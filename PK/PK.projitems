@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>{6B417F11-2444-4F54-9B0C-ACA7CB7694F7}</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>PK</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\HomeViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Calibration\CalibrateViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Calibration\DistanceTestViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Calibration\ManualCalibrationViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Calibration\Zoning\ConfigureZonesViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\PKRealm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Calibration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Zone.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Strings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IBluetoothLEAdvertisement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IBluetoothLEState.cs" />
+  </ItemGroup>
+</Project>
