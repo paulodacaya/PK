@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v7.widget.Toolbar 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?android:attr/actionBarSize"
+    android:background="@android:color/transparent"
+    android:theme="@style/PerfectlyKeylessActionBarTheme">
+    
+    <FrameLayout
+        android:id="@+id/content_toolbar_left_imageview_container"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="left"
+        android:foreground="@drawable/ripple_rounded"
+        android:clickable="true">
+        
+        <ImageView
+            android:id="@+id/content_toolbar_left_imageview_setting"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/Settings"
+            android:tint="@color/White" />
+        
+        <ImageView
+            android:id="@+id/content_toolbar_left_imageview_left"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ChevronLeft"
+            android:tint="@color/White" />
+        
+    </FrameLayout>
+    
+    <TextView
+        android:id="@+id/content_toolbar_textview_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+        android:fontFamily="@font/brixsansbold"
+        android:textSize="@dimen/abc_text_size_large_material"
+        android:textColor="@color/White" />
+    
+</android.support.v7.widget.Toolbar>
+
+

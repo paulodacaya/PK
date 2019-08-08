@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root_constraintLayout_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+    <include 
+        android:id="@+id/root_content_toolbar"
+        layout="@layout/content_toolbar" />
+    
+    <View
+        android:id="@+id/root_radial_view_static"
+        android:layout_width="0dp"
+        android:layout_height="84dp"
+        app:layout_constraintStart_toStartOf="@+id/root_imageview_vehicle"
+        app:layout_constraintBottom_toBottomOf="@+id/root_imageview_vehicle"
+        app:layout_constraintEnd_toEndOf="@+id/root_imageview_vehicle" />
+    
+    <View
+        android:id="@+id/root_radial_view_pulse"
+        android:layout_width="0dp"
+        android:layout_height="84dp"
+        android:background="@drawable/shape_oval_outerspacelight"
+        app:layout_constraintStart_toStartOf="@+id/root_imageview_vehicle"
+        app:layout_constraintBottom_toBottomOf="@+id/root_imageview_vehicle"
+        app:layout_constraintEnd_toEndOf="@+id/root_imageview_vehicle" />
+    
+    <ImageView
+        android:id="@+id/root_imageview_vehicle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginEnd="64dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.178" />
+    
+    <ImageView
+        android:id="@+id/root_imageview_iso_male"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintCircle="@+id/root_imageview_vehicle"
+        app:layout_constraintCircleRadius="140dp"
+        app:layout_constraintCircleAngle="90" />
+    
+    <FrameLayout
+        android:id="@+id/root_framelayout_fragment_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/root_content_toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+    
+</android.support.constraint.ConstraintLayout>

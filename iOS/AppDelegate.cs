@@ -1,5 +1,6 @@
 ﻿using System;
 using Foundation;
+using ObjCRuntime;
 using PK.iOS.Controllers;
 using PK.iOS.Helpers;
 using PK.Models;
@@ -84,6 +85,13 @@ namespace PK.iOS
       public override void WillTerminate( UIApplication application )
       {
          // Called when the application is about to terminate. Save data, if needed. See also DidEnterBackground.
+      }
+
+      public UIInterfaceOrientationMask OrientationLock = UIInterfaceOrientationMask.Portrait; // Default Orientation
+
+      public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations( UIApplication application, [Transient] UIWindow forWindow )
+      {
+         return OrientationLock;
       }
    }
 }

@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+
+<resources>
+    <dimen name="corner_radius_small">4dp</dimen>
+    <dimen name="corner_radius_medium">12dp</dimen>
+    <dimen name="corner_radius_large">100dp</dimen>
+    
+    <dimen name="home_recyclerview_row_height">72dp</dimen>
+</resources>

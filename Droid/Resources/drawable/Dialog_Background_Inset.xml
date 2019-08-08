@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+
+<inset
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/shape_rounded_background_dialog_white" 
+    android:insetRight="40dp"
+    android:insetLeft="40dp">
+</inset>

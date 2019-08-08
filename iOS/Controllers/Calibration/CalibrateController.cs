@@ -5,6 +5,7 @@ using PK.iOS.Helpers;
 using PK.ViewModels;
 using static PK.iOS.Helpers.Stacks;
 using UIKit;
+using AVFoundation;
 
 namespace PK.iOS.Controllers
 {
@@ -173,7 +174,18 @@ namespace PK.iOS.Controllers
 
       bool ICalibrateViewModel.VerifyCameraPermission( )
       {
-         return true;
+         /*
+          * This is using Native iOS API. Xamarin Essentials may release an easier way to do this.
+          */
+
+         if( AVCaptureDevice.GetAuthorizationStatus( AVAuthorizationMediaType.Video ) == AVAuthorizationStatus.Authorized )
+            return true;
+
+         // Request camera permission because it's not authorized
+         AVCaptureDevice.RequestAccessForMediaType( AVAuthorizationMediaType.Video, granted => {
+         } );
+
+         return false;
       }
 
       void ICalibrateViewModel.NavigateToConfigureZones( )

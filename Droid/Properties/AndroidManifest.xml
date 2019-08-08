@@ -1,5 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="com.paulodacaya.pk">
-	<uses-sdk android:minSdkVersion="15" />
-	<application android:label="pk"></application>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.paulodacaya.pk" android:versionCode="1" android:versionName="0.1.0">
+	<uses-sdk android:minSdkVersion="26" android:targetSdkVersion="28" />
+	<uses-permission android:name="android.permission.BLUETOOTH" />
+	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-permission android:name="android.permission.CAMERA" />
+	<uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
+	<application android:label="@string/app_name" android:theme="@style/PerfectlyKeylessDroidTheme" android:icon="@mipmap/perfectlykeylessappicon" android:roundIcon="@mipmap/perfectlykeylessappicon_round" android:appCategory="maps">
+		<meta-data android:name="com.google.ar.core" android:value="optional" />
+	</application>
 </manifest>

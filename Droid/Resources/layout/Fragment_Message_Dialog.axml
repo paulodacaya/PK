@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/dialog_background_inset" >
+    
+    <TextView
+        android:id="@+id/textview_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:fontFamily="@font/brixsansbold"
+        android:textSize="19sp"
+        android:textColor="@color/OuterSpace"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+    
+    <TextView
+        android:id="@+id/textview_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
+        android:fontFamily="@font/brixsansregular"
+        android:textSize="15sp"
+        android:textColor="@color/AuroMetalSaurus"
+        app:layout_constraintTop_toBottomOf="@+id/textview_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/view_buttons_container"/>
+    
+    <View
+        android:id="@+id/view_buttons_container"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:background="@drawable/shape_rounded_bottom_outerspacelight"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+    
+    <Button 
+        android:id="@+id/button_positive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:layout_marginEnd="24dp"
+        style="?android:attr/borderlessButtonStyle"
+        android:fontFamily="@font/brixsansbold"
+        android:textColor="@color/White"
+        android:textSize="16sp"
+        app:layout_constraintTop_toTopOf="@+id/view_buttons_container"
+        app:layout_constraintBottom_toBottomOf="@+id/view_buttons_container"
+        app:layout_constraintEnd_toEndOf="@+id/view_buttons_container"/>       
+    
+    <!-- <Button
+        android:id="@+id/button_negative"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="12dp"
+        style="?android:attr/borderlessButtonStyle"
+        android:fontFamily="@font/brixsansbold"
+        android:textColor="@color/InnovativeBlue"
+        android:textSize="18sp" 
+        app:layout_constraintTop_toTopOf="@+id/button_positive"
+        app:layout_constraintBottom_toBottomOf="@+id/button_positive"
+        app:layout_constraintEnd_toStartOf="@+id/button_positive" />-->
+        
+</android.support.constraint.ConstraintLayout>

@@ -35,6 +35,13 @@ namespace PK.iOS.Controllers
          SetupViews( );
       }
 
+      public override void ViewWillAppear( bool animated )
+      {
+         base.ViewWillAppear( animated );
+
+         OrienationHelper.LockOrientation( UIInterfaceOrientationMask.All );
+      }
+
       public override void ViewDidAppear( bool animated )
       {
          base.ViewDidAppear( animated );
@@ -119,7 +126,13 @@ namespace PK.iOS.Controllers
       }
 
       #region Event Handlers
-      private void HandleBackButtonTouchUpInside( object sender, EventArgs e ) => DismissViewController( animated: true, completionHandler: null );
+      private void HandleBackButtonTouchUpInside( object sender, EventArgs e )
+      {
+         // Lock orientation back to default (portrait) and force rotate it.
+         OrienationHelper.LockOrientation( UIInterfaceOrientationMask.Portrait, rotateToOrientation: UIInterfaceOrientationMask.Portrait );
+
+         DismissViewController( animated: true, completionHandler: null );
+      }
 
       private void HandleRestartButtonTouchUpInside( object sender, EventArgs e ) => RestartARExperience( );
       #endregion
