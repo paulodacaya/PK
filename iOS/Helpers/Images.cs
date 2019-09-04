@@ -42,5 +42,7 @@ namespace PK.iOS.Helpers
       public static UIImage FingerprintAR => UIImage.FromBundle( "FingerprintAR" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysOriginal );
       public static UIImage Flashlight => UIImage.FromBundle( "Flashlight" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
       public static UIImage FlashlightOff => UIImage.FromBundle( "FlashlightOff" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
+      public static UIImage CircleSlice => UIImage.FromBundle( "CircleSlice" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
+      public static UIImage CardBulletedOutline => UIImage.FromBundle( "CardBulletedOutline" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
    }
 }

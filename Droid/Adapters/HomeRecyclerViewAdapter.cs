@@ -15,7 +15,7 @@ namespace PK.Droid.Adapters
          this.viewModel = viewModel;
       }
 
-      public override int ItemCount => viewModel.ListItemViewModels.Count + 1;
+      public override int ItemCount => viewModel.ListItems.Count + 1;
 
       public override int GetItemViewType( int position ) => position;
 
@@ -46,7 +46,7 @@ namespace PK.Droid.Adapters
          else
          {
             var homeListViewHolder = holder as HomeListViewHolder;
-            homeListViewHolder.ListItemViewModel = viewModel.ListItemViewModels[ position - 1 ];
+            homeListViewHolder.ListItemViewModel = viewModel.ListItems[ position - 1 ];
          }
       }
    }

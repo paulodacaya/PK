@@ -160,26 +160,21 @@
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Helpers\Images.cs" />
     <Compile Include="Bluetooth\iOSBluetoothLE.cs" />
-    <Compile Include="Views\HomeListItemCell.cs" />
+    <Compile Include="Views\ListItemCell.cs" />
     <Compile Include="Views\HomeSectionItemView.cs" />
     <Compile Include="Views\ZoneCell.cs" />
-    <Compile Include="Views\OptionListItemCell.cs" />
     <Compile Include="Controllers\RootNavigationController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\Settings\SettingController.cs" />
-    <Compile Include="Controllers\Calibration\CalibrateController.cs" />
-    <Compile Include="Controllers\Calibration\CalibratePageOneController.cs" />
-    <Compile Include="Controllers\Calibration\DistanceTestController.cs" />
     <Compile Include="Controllers\Calibration\CameraCalibrationController.cs" />
-    <Compile Include="Controllers\Calibration\CalibratePageTwoController.cs" />
-    <Compile Include="Controllers\Calibration\PreferredLocationController.cs" />
-    <Compile Include="Controllers\Calibration\ManualCalibrationController.cs" />
     <Compile Include="Controllers\Calibration\Zoning\ZoneSelectionController.cs" />
     <Compile Include="Controllers\Calibration\Zoning\ConfigureZonesController.cs" />
     <Compile Include="Controllers\Modals\DialogController.cs" />
     <Compile Include="Controllers\Modals\BaseModalController.cs" />
     <Compile Include="Controllers\Modals\SnackBarController.cs" />
     <Compile Include="Helpers\OrienationHelper.cs" />
+    <Compile Include="Helpers\ARCameraHelper.cs" />
+    <Compile Include="Controllers\Calibration\CalibrateOnBoardingController.cs" />
   </ItemGroup>
   <ItemGroup>
     <ImageAsset Include="Assets.xcassets\.DS_Store" />
@@ -300,8 +295,6 @@
     <ImageAsset Include="Assets.xcassets\ArrowUp.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\ArrowUp.imageset\ArrowUp256.png" />
     <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\ARImage.arreferenceimage\ThumbPrintAR.png" />
-    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\ARImage.arreferenceimage\Contents.json" />
     <ImageAsset Include="Assets.xcassets\Restart.imageset\Restart64.png" />
     <ImageAsset Include="Assets.xcassets\Restart.imageset\Restart256.png" />
     <ImageAsset Include="Assets.xcassets\Restart.imageset\Restart128.png" />
@@ -330,10 +323,6 @@
     <ImageAsset Include="Assets.xcassets\Pants.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\Pants.imageset\Pants128.png" />
     <ImageAsset Include="Assets.xcassets\Pants.imageset\Pants64.png" />
-    <ImageAsset Include="Assets.xcassets\MazdaBadge.imageset\MazdaBadge512.png" />
-    <ImageAsset Include="Assets.xcassets\MazdaBadge.imageset\MazdaBadge1024.png" />
-    <ImageAsset Include="Assets.xcassets\MazdaBadge.imageset\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\MazdaBadge.imageset\MazdaBadge256.png" />
     <ImageAsset Include="Assets.xcassets\CarZoneDriver.imageset\CarZoneDriver256.png" />
     <ImageAsset Include="Assets.xcassets\CarZoneDriver.imageset\CarZoneDriver128.png" />
     <ImageAsset Include="Assets.xcassets\CarZoneDriver.imageset\Contents.json" />
@@ -347,6 +336,29 @@
     <ImageAsset Include="Assets.xcassets\CarZoneWelcome.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\CarZoneWelcome.imageset\CarZoneWelcome256.png" />
     <ImageAsset Include="Assets.xcassets\LaunchImage.launchimage\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\FingerPrintAR.arreferenceimage\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\FingerPrintAR.arreferenceimage\ThumbPrintAR.png" />    
+    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\PlantAR.arreferenceimage\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\PlantAR.arreferenceimage\plant_credit_card_size_AR.png" />
+    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRect1AR.arreferenceimage\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRect1AR.arreferenceimage\door_button1_rect_AR.png" />
+    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRound1AR.arreferenceimage\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRound1AR.arreferenceimage\door_button1_rounded_AR.png" />
+    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRect2AR.arreferenceimage\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRect2AR.arreferenceimage\door_button2_rect_AR.png" />
+    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRound2AR.arreferenceimage\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRound2AR.arreferenceimage\door_button2_rounded_AR.png" />
+    <ImageAsset Include="Assets.xcassets\CircleSlice.imageset\CircleSlice128.png" />
+    <ImageAsset Include="Assets.xcassets\CircleSlice.imageset\CircleSlice256.png" />
+    <ImageAsset Include="Assets.xcassets\CircleSlice.imageset\CircleSlice64.png" />
+    <ImageAsset Include="Assets.xcassets\CircleSlice.imageset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\CardBulletedOutline.imageset\Card128.png" />
+    <ImageAsset Include="Assets.xcassets\CardBulletedOutline.imageset\Card256.png" />
+    <ImageAsset Include="Assets.xcassets\CardBulletedOutline.imageset\Card64.png" />
+    <ImageAsset Include="Assets.xcassets\CardBulletedOutline.imageset\CardBulletedOutline128.png" />
+    <ImageAsset Include="Assets.xcassets\CardBulletedOutline.imageset\CardBulletedOutline256.png" />
+    <ImageAsset Include="Assets.xcassets\CardBulletedOutline.imageset\CardBulletedOutline64.png" />
+    <ImageAsset Include="Assets.xcassets\CardBulletedOutline.imageset\Contents.json" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\Fonts\BrixSansMedium.otf">
@@ -364,6 +376,17 @@
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="LaunchScreen.storyboard" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Assets.xcassets\AR Resources.arresourcegroup\FingerPrintAR.arreferenceimage\" />
+    <Folder Include="Assets.xcassets\AR Resources.arresourcegroup\PlantAR.arreferenceimage\" />
+    <Folder Include="Assets.xcassets\AR Resources.arresourcegroup\PlantAR.arreferenceimage\" />
+    <Folder Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRect1AR.arreferenceimage\" />
+    <Folder Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRound1AR.arreferenceimage\" />
+    <Folder Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRect2AR.arreferenceimage\" />
+    <Folder Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRound2AR.arreferenceimage\" />
+    <Folder Include="Assets.xcassets\CircleSlice.imageset\" />
+    <Folder Include="Assets.xcassets\CardBulletedOutline.imageset\" />
   </ItemGroup>
   <Import Project="..\PK\PK.projitems" Label="Shared" Condition="Exists('..\PK\PK.projitems')" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />

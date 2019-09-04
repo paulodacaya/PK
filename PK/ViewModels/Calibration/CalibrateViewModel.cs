@@ -16,24 +16,11 @@ namespace PK.ViewModels
    public class CalibrateViewModel
    {
       public string Title => "CALIBRATE";
-
       public string ConfigureZonesText = "Configure Zones";
-
       public string PageOneTitleText => "Let's Calibrate your Device!";
       public string PageOneDescriptionText => "We need to know how far you are from your vehicle. You have a number options to complete this calibration.";
       public string PageOneActionText => "NEXT";
-
       public string PageTwoTitleText => "Select an option:";
-
-      public bool CalibrationCompleted
-      {
-         get
-         {
-            var realm = Realm.GetInstance( PKRealm.Configuration );
-            var calibrationData = realm.Find<CalibrationData>( 0 );
-            return calibrationData?.Completed ?? false;
-         }
-      }
 
       public OptionListViewModel[ ] OptionList;
 

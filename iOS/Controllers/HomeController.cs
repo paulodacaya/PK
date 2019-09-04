@@ -11,7 +11,7 @@ namespace PK.iOS.Controllers
    public class HomeController : UITableViewController, IHomeViewModel
    {
       private readonly HomeViewModel viewModel;
-      private readonly string cellID = "zoningListItemCellID";
+      private readonly string cellId = "homeListCellId";
 
       public HomeController( ) : base( withStyle: UITableViewStyle.Grouped )
       {
@@ -22,15 +22,10 @@ namespace PK.iOS.Controllers
       {
          base.ViewDidLoad( );
 
+         ( ( RootNavigationController )NavigationController ).OverrideTransitionDelegate( );
+
          SetupNavigation( );
          SetupTableView( );
-      }
-
-      public override void ViewWillAppear( bool animated )
-      {
-         base.ViewWillAppear( animated );
-
-         ( NavigationController as RootNavigationController )?.ShowVehicle( );
       }
 
       private void SetupNavigation( )
@@ -55,36 +50,30 @@ namespace PK.iOS.Controllers
          TableView.SeparatorStyle = UITableViewCellSeparatorStyle.None;
          TableView.ContentInset = new UIEdgeInsets( View.Frame.Height * 0.33f, 0, 0, 0 );
 
-         TableView.RegisterClassForCellReuse( typeof( HomeListItemCell ), cellID );
+         TableView.RegisterClassForCellReuse( typeof( ListItemCell ), cellId );
       }
 
       public override nint NumberOfSections( UITableView tableView ) => 1;
 
       public override UIView GetViewForHeader( UITableView tableView, nint section ) => new HomeSectionItemView( );
 
-      public override nint RowsInSection( UITableView tableView, nint section ) => viewModel.ListItemViewModels.Count;
+      public override nint RowsInSection( UITableView tableView, nint section ) => viewModel.ListItems.Count;
 
       public override UITableViewCell GetCell( UITableView tableView, NSIndexPath indexPath )
       {
-         var cell = tableView.DequeueReusableCell( cellID, indexPath ) as HomeListItemCell;
-         cell.ListItemViewModel = viewModel.ListItemViewModels[ indexPath.Row ];
+         var cell = tableView.DequeueReusableCell( cellId, indexPath ) as ListItemCell;
+         cell.ListItemViewModel = viewModel.ListItems[ indexPath.Row ];
 
          return cell;
       }
 
       public override void RowSelected( UITableView tableView, NSIndexPath indexPath )
       {
-         viewModel.ListItemViewModels[ indexPath.Row ].Selected( );
+         viewModel.ListItems[ indexPath.Row ].Selected( );
          tableView.DeselectRow( indexPath, animated: false );
       }
 
       #region IZoningViewModel
-      void IHomeViewModel.NavigateToCalibrateScreen( )
-      {
-         var vc = new CalibrateController( );
-         NavigationController.PushViewController( viewController: vc, animated: true );
-      }
-
       void IHomeViewModel.NotifyLockChanged( )
       {
       }

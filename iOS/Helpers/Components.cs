@@ -30,48 +30,6 @@ namespace PK.iOS.Helpers
       }
    }
 
-   public class PKButton : UIButton
-   {
-      public override bool Highlighted 
-      { 
-         get => base.Highlighted; 
-         set
-         {
-            base.Highlighted = value;
-
-            BackgroundColor = value ? Colors.WhiteWithTransparancy : Colors.Clear;
-         }
-      }
-
-      public override bool Enabled 
-      { 
-         get => base.Enabled;
-         set
-         {
-            base.Enabled = value;
-
-            Layer.BorderColor = value ? Colors.White.CGColor : Colors.OuterSpaceLight.CGColor;
-            Layer.ShadowColor = value ? Colors.White.CGColor : Colors.OuterSpaceLight.CGColor;
-         }
-      }
-
-      public PKButton( )
-      {
-         ContentEdgeInsets = new UIEdgeInsets( 10, 26, 10, 26 );
-         BackgroundColor = Colors.Clear;
-
-         TitleLabel.Font = Fonts.Bold.WithSize( 14 );
-
-         Layer.BorderColor = Colors.White.CGColor;
-         Layer.BorderWidth = 1;
-         Layer.CornerRadius = Values.CornerRadius;
-         Layer.ShadowColor = Colors.White.CGColor;
-         Layer.ShadowOpacity = 0.4f;
-         Layer.ShadowOffset = new CGSize( 0, 0 );
-         Layer.ShadowRadius = Values.CornerRadius;
-      }
-   }
-
    public class RadialGradientLayer : CALayer
    {
       private readonly CGPoint center;
@@ -91,7 +49,7 @@ namespace PK.iOS.Helpers
 
          var locations = new nfloat[ ] { 0, 1 };
 
-         var endRadius = Bounds.Size.Width / 2;
+         var endRadius = Bounds.Size.Width / 1.5f;
 
          var gradient = new CGGradient( colorspace: null, colors );
 
@@ -106,68 +64,6 @@ namespace PK.iOS.Helpers
       }
    }
 
-   public class EllipseView : UIView
-   {
-      private readonly string pulseKey = "pulse";
-      private bool isPulsating;
-
-      private CAShapeLayer ellipseLayer;
-      private CAShapeLayer pulsatingLayer;
-      private CABasicAnimation animation;
-
-      public EllipseView( )
-      {
-         SetupAnimations( );
-      }
-
-      private void SetupAnimations( )
-      {
-         animation = CABasicAnimation.FromKeyPath( "transform.scale" );
-         animation.Duration = 1;
-         animation.To = NSNumber.FromFloat( 1.2f );
-         animation.TimingFunction = CAMediaTimingFunction.FromName( CAMediaTimingFunction.EaseInEaseOut );
-         animation.AutoReverses = true;
-         animation.RepeatCount = float.PositiveInfinity;
-      }
-
-      public override void Draw( CGRect rect )
-      {
-         ellipseLayer = new CAShapeLayer {
-            Frame = rect,
-            Path = UIBezierPath.FromOval( inRect: rect ).CGPath,
-            FillColor = Colors.OuterSpaceLight.ColorWithAlpha( 0.4f ).CGColor,
-         };
-
-         pulsatingLayer = new CAShapeLayer {
-            Frame = rect,
-            Path = UIBezierPath.FromOval( inRect: rect.Inset( dx: -6, dy: -6 ) ).CGPath,
-            FillColor = Colors.OuterSpaceLight.ColorWithAlpha( 0.2f ).CGColor,
-         };
-
-         Layer.AddSublayer( ellipseLayer );
-      }
-
-      public void BeginPulsating( )
-      {
-         if( isPulsating )
-            return;
-
-         isPulsating = true;
-         Layer.AddSublayer( pulsatingLayer );
-         pulsatingLayer.AddAnimation( animation, key: pulseKey );
-      }
-
-      public void EndPulsating( ) 
-      {
-         if( !isPulsating )
-            return;
-
-         isPulsating = false;
-         pulsatingLayer.RemoveAnimation( pulseKey );
-         pulsatingLayer.RemoveFromSuperLayer( );
-      } 
-   }
-
    public class CircularCheckBox : BEMCheckBox
    {
       public CircularCheckBox( )
@@ -175,12 +71,52 @@ namespace PK.iOS.Helpers
          BoxType = BEMBoxType.Circle;
          OnAnimationType = BEMAnimationType.Bounce;
          OffAnimationType = BEMAnimationType.Bounce;
-         TintColor = Colors.OuterSpace.ColorWithAlpha( 0.1f );
-         OnTintColor = Colors.OuterSpace;
-         OnCheckColor = Colors.OuterSpace;
+         TintColor = Colors.White.ColorWithAlpha( 0.1f );
+         OnTintColor = Colors.White;
+         OnCheckColor = Colors.White;
          OnFillColor = Colors.Clear;
          OffFillColor = Colors.Clear;
          LineWidth = 1;
+      }
+   }
+
+   public class PKLabel : UILabel
+   {
+      public PKLabel( string text, UIColor textColor, UIFont font, int lines = 0 )
+      {
+         Text = text;
+         TextColor = textColor;
+         Font = font;
+         Lines = lines;
+      }
+   }
+
+   public class PKNumberView: UIView
+   {
+      public PKNumberView( string number )
+      {
+         Layer.BorderWidth = 1.2f;
+         Layer.BorderColor = Colors.White.CGColor;
+
+         var numberLabel = new UILabel {
+            Text = number,
+            TextColor = Colors.White,
+            Font = Fonts.Bold.WithSize( 18 )
+         };
+
+         AddSubview( numberLabel );
+
+         numberLabel.CenterInSuperView( );
+      }
+   }
+
+   public class PKImageView: UIImageView
+   {
+      public PKImageView( UIImage image, UIColor tintColor, UIViewContentMode contentMode = UIViewContentMode.ScaleAspectFit )
+      {
+         Image = image;
+         TintColor = tintColor;
+         ContentMode = contentMode;
       }
    }
 }

@@ -26,44 +26,27 @@ namespace PK.Models
 
       public static string Path => Configuration.DatabasePath;
 
-      public static CalibrationData CreateDefaultCalibrationData( )
+      public static bool DeviceIsCalibrated( )
       {
          var realm = Realm.GetInstance( Configuration );
-         CalibrationData calibrationData = null;
 
-         try
+         var calibration = realm.Find<Calibration>( Calibration.PrimaryKey );
+
+         if( calibration == null )
          {
-            using( var transaction = realm.BeginWrite( ) )
-            {
-               calibrationData = new CalibrationData {
-                  CalibrationID = 0,
+            realm.Write( ( ) => {
+               Console.WriteLine( "PK - Creating new Calibration table." );
+               var newCalibration = new Calibration {
+                  ID = Calibration.PrimaryKey
                };
 
-               var locationData = new CalibrationLocationData {
-                  LocationID = AnchorLocation.PassangerDoor
-               };
+               realm.Add( newCalibration );
+            } );
 
-               calibrationData.LocationsData.Add( locationData );
-
-               for( var i = 0; i < 8; i++ )
-               {
-                  var distanceData = new CalibrationDistanceData {
-                     Distance = i + 1
-                  };
-
-                  locationData.DistancesData.Add( distanceData );
-               }
-
-               realm.Add( calibrationData );
-               transaction.Commit( );
-            }
-         }
-         catch( Exception ex )
-         {
-            throw new Exception( $"Creating calibration data failed. Exception: {ex.Message}" );
+            return false;
          }
 
-         return calibrationData;
+         return calibration.IsCalibrated;
       }
    }
 }

@@ -17,7 +17,7 @@ namespace PK.iOS.Controllers
       private readonly ConfigureZonesViewModel viewModel;
       private readonly List<ZoneView> zoneViews;
 
-      private UIButton doneButton;
+      // UI Elements
       private UIView zoneContainerView;
       private UIImageView carImageView;
       private ZoneSelectionController zoneSelectionController;
@@ -36,62 +36,30 @@ namespace PK.iOS.Controllers
       {
          base.ViewDidLoad( );
 
-         ( NavigationController as RootNavigationController )?.HideVehicle( );
-
          SetupNavigation( );
+         SetupViews( );
          SetupZoneViews( );
          SetupZoneSelection( );
-         SetupSlider( );
+         SetupSliderAndActionButton( );
          SetupDistanceViews( );
 
          viewModel.ZoneModels[ 0 ].Selected( ); // Select Welcome Zone
       }
 
-      public override void ViewDidLayoutSubviews( )
-      {
-         base.ViewDidLayoutSubviews( );
-
-         doneButton.WithCornerRadius( doneButton.Frame.Height / 2 );
-      }
-
       private void SetupNavigation( )
       {
-         var backButton = new UIButton( UIButtonType.System ) {
-            ContentEdgeInsets = new UIEdgeInsets( 0, 0, 0, 0 ),
-            TintColor = Colors.White,
-         };
-         backButton.SetImage( Images.ChevronLeft, UIControlState.Normal );
-         backButton.Anchor( size: new CGSize( 22, 22 ) );
-         backButton.TouchUpInside += ( sender, e ) => {
-            NavigationController.PopViewController( animated: true );
-         };
+         NavigationController.SetNavigationBarHidden( true, animated: false );
+      }
 
-         doneButton = new UIButton( UIButtonType.System );
-         doneButton.TitleLabel.Font = Fonts.Bold.WithSize( 16 );
-         doneButton.SetTitle( "Done", UIControlState.Normal );
-         doneButton.SetTitleColor( Colors.White, UIControlState.Normal );
-         doneButton.WithBorder( width: 1, color: Colors.White );
-         doneButton.WithSize( new CGSize( 80, 34 ) );
-         doneButton.TouchUpInside += HandleDoneButtonTouchUpInside;
-
-         NavigationItem.LeftBarButtonItem = new UIBarButtonItem( customView: backButton );
-         NavigationItem.RightBarButtonItem = new UIBarButtonItem( customView: doneButton );
+      private void SetupViews( )
+      {
+         View.BackgroundColor = Colors.OuterSpace;
       }
 
       private void SetupZoneViews( )
       {
-         var titleLabel = new UILabel {
-            Text = viewModel.Title,
-            TextColor = Colors.White,
-            Font = Fonts.Bold.WithSize( 24 )
-         };
-
-         var subTitleLabel = new UILabel {
-            Text = viewModel.SubTitle,
-            TextColor = Colors.White,
-            Font = Fonts.Medium.WithSize( 14 ),
-            Lines = 0,
-         };
+         var titleLabel = new PKLabel( viewModel.Title, Colors.White, Fonts.Bold.WithSize( 24 ) );
+         var subTitleLabel = new PKLabel( viewModel.SubTitle, Colors.Gray, Fonts.Medium.WithSize( 18 ) );
 
          var stackView = VStack(
             titleLabel,
@@ -110,7 +78,7 @@ namespace PK.iOS.Controllers
             Image = Images.Mazda3TopView,
             ContentMode = UIViewContentMode.ScaleAspectFit
          };
-         var longPressGesture = new UILongPressGestureRecognizer( HandleBadgeLongPress ) { 
+         var longPressGesture = new UILongPressGestureRecognizer( HandleCarLongPress ) { 
             MinimumPressDuration = 0
          };
          carImageView.AddGestureRecognizer( longPressGesture );
@@ -167,6 +135,54 @@ namespace PK.iOS.Controllers
             trailing: View.TrailingAnchor, size: new CGSize( 0,  80 ) );
       }
 
+      private void SetupSliderAndActionButton( )
+      {
+         var actionButton = new UIButton( UIButtonType.System );
+         actionButton.SetImage( Images.ChevronRight, UIControlState.Normal );
+         actionButton.ImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
+         actionButton.ImageView.WithSquareSize( 20 );
+         actionButton.TintColor = Colors.OuterSpace;
+         actionButton.BackgroundColor = Colors.White;
+         actionButton.WithSquareSize( 50 );
+         actionButton.WithCornerRadius( 25 );
+         actionButton.WithShadow( opacity: 0.5f, radius: 2, color: Colors.White );
+         actionButton.TouchUpInside += HandleActionButtonTouchUpInside;
+
+         View.AddSubview( actionButton );
+
+         actionButton.Anchor( bottom: View.LayoutMarginsGuide.BottomAnchor, trailing: View.LayoutMarginsGuide.TrailingAnchor,
+            padding: new UIEdgeInsets( 0, 0, 14, 0 ) );
+
+         var leftImageView = new UIImageView {
+            Image = Images.CircleOutline,
+            TintColor = Colors.WhiteWithTransparancy,
+         };
+
+         var rightImageView = new UIImageView {
+            Image = Images.CircleOutline,
+            TintColor = Colors.WhiteWithTransparancy,
+         };
+
+         slider = new UISlider {
+            ThumbTintColor = Colors.White,
+            MinimumTrackTintColor = Colors.LightWhite,
+            MaximumTrackTintColor = Colors.LightWhite,
+            TintColor = Colors.WhiteWithTransparancy,
+         };
+         slider.ValueChanged += SliderValueChanged;
+
+         var stackView = HStack(
+            leftImageView.WithSquareSize( 12 ),
+            slider,
+            rightImageView.WithSquareSize( 22 )
+         ).With( spacing: 12, alignment: UIStackViewAlignment.Center );
+
+         View.AddSubview( stackView );
+
+         stackView.Anchor( leading: View.LayoutMarginsGuide.LeadingAnchor, bottom: actionButton.TopAnchor,
+            trailing: View.LayoutMarginsGuide.TrailingAnchor, padding: new UIEdgeInsets( 0, 0, 24, 0 ) );
+      }
+
       private void SetupDistanceViews( )
       {
          distanceLabel = new UILabel {
@@ -199,43 +215,9 @@ namespace PK.iOS.Controllers
             trailing: View.LayoutMarginsGuide.TrailingAnchor, bottom: slider.TopAnchor );
       }
 
-      private void SetupSlider( )
-      {
-         var leftImageView = new UIImageView {
-            Image = Images.CircleOutline,
-            TintColor = Colors.WhiteWithTransparancy,
-         };
-
-         var rightImageView = new UIImageView {
-            Image = Images.CircleOutline,
-            TintColor = Colors.WhiteWithTransparancy,
-         };
-
-         slider = new UISlider {
-            ThumbTintColor = Colors.White,
-            MinimumTrackTintColor = Colors.LightWhite,
-            MaximumTrackTintColor = Colors.LightWhite,
-            TintColor = Colors.WhiteWithTransparancy,
-         };
-         slider.ValueChanged += SliderValueChanged;
-
-         var stackView = HStack( 
-            leftImageView.WithSquareSize( 12 ),
-            slider,
-            rightImageView.WithSquareSize( 22 )
-         ).With( spacing: 12, alignment: UIStackViewAlignment.Center );
-
-         View.AddSubview( stackView );
-
-         stackView.Anchor( leading: View.LayoutMarginsGuide.LeadingAnchor, bottom: View.LayoutMarginsGuide.BottomAnchor,
-            trailing: View.LayoutMarginsGuide.TrailingAnchor, padding: new UIEdgeInsets( 0, 0, 12, 0 ) );
-      }
-
       private void SliderValueChanged( object sender, EventArgs e ) => UpdateZoneViewSize( );
 
-      private void HandleDoneButtonTouchUpInside( object sender, EventArgs e ) => viewModel.DoneSelected( );
-
-      private void HandleBadgeLongPress( UILongPressGestureRecognizer gesture )
+      private void HandleCarLongPress( UILongPressGestureRecognizer gesture )
       {
          UIView.AnimateNotify( duration: 0.15, animation: ( ) => {
 
@@ -254,6 +236,8 @@ namespace PK.iOS.Controllers
 
          }, completion: null );
       }
+
+      private void HandleActionButtonTouchUpInside( object sender, EventArgs e ) => viewModel.ActionSelected( );
 
       void IConfigureZonesViewModel.ZoneSelected( ZoneType zoneType, double distance, double min, double max )
       {

@@ -18,20 +18,21 @@ namespace PK.iOS
       public override bool FinishedLaunching( UIApplication application, NSDictionary launchOptions )
       {
 #if DEBUG
-         // Log Realm file location
-         try
-         {
-            Console.WriteLine( $"Realm file location: {PKRealm.Path}" );
-         }
-         catch( Exception ex )
-         {
-            Console.WriteLine( $"Exception: {ex.Message}" );
-         }
+         Console.WriteLine( $"PK - Realm file location: {PKRealm.Path}" );
 #endif
 
          Window = new UIWindow( );
          Window.MakeKeyAndVisible( );
-         Window.RootViewController = new RootNavigationController( );
+
+         if( PKRealm.DeviceIsCalibrated( ) )
+         {
+            // TODO Navigate to home screen
+         }
+         else
+         {
+            // Navigate to Calibration OnBoarding
+            Window.RootViewController = new RootNavigationController( rootViewController: new HomeController( ) );
+         }
 
          ApplyGlobalStyling( );
 
@@ -52,8 +53,6 @@ namespace PK.iOS
          UITableView.Appearance.BackgroundColor = Colors.Clear;
 
          UITableViewCell.Appearance.BackgroundColor = Colors.Clear;
-
-         UIPageControl.Appearance.CurrentPageIndicatorTintColor = Colors.White;
       }
 
       public override void OnResignActivation( UIApplication application )
@@ -87,7 +86,8 @@ namespace PK.iOS
          // Called when the application is about to terminate. Save data, if needed. See also DidEnterBackground.
       }
 
-      public UIInterfaceOrientationMask OrientationLock = UIInterfaceOrientationMask.Portrait; // Default Orientation
+      // Default Orientation
+      public UIInterfaceOrientationMask OrientationLock = UIInterfaceOrientationMask.Portrait; 
 
       public override UIInterfaceOrientationMask GetSupportedInterfaceOrientations( UIApplication application, [Transient] UIWindow forWindow )
       {

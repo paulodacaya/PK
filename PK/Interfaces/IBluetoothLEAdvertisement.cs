@@ -1,9 +1,9 @@
-﻿using System;
+﻿using PK.Helpers;
 
 namespace PK.Interfaces
 {
    public interface IBluetoothLEAdvertisement
    {
-      void ReceivedAdvertisement( int anchorLocationID, int RSSI );
+      void ReceivedPKAdvertisement( Anchor anchor, int RSSI );
    }
 }

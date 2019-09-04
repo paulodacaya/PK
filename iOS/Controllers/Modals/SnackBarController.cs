@@ -129,8 +129,8 @@ namespace PK.iOS.Controllers
          actionButton.TouchUpInside += ActionButtonTouchUpInside;
 
          var stackView = HStack(
-            iconImageView, 
-            messageLabel, 
+            iconImageView,
+            messageLabel,
             actionButton
          ).With( spacing: 12, distribution: UIStackViewDistribution.FillProportionally ).WithPadding( new UIEdgeInsets( 10, 12, 10, 12 ) );
 

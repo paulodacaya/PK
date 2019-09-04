@@ -39,7 +39,7 @@ namespace PK.iOS.Views
          containerView = new UIView { 
             UserInteractionEnabled = true,
          };
-         containerView.Layer.BorderColor = Colors.White.CGColor;
+         containerView.Layer.BorderColor = Colors.InnerSpace.CGColor;
          containerView.Layer.BorderWidth = 1;
          containerView.AddGestureRecognizer( longPressGesture );
 
@@ -50,7 +50,7 @@ namespace PK.iOS.Views
 
          textLabel = new UILabel {
             Text = isLocked ? "Locked" : "Unlocked",
-            TextColor = Colors.White,
+            TextColor = Colors.InnerSpace,
             Font = Fonts.Regular.WithSize( 13 ),
          };
 

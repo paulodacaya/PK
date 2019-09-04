@@ -54,7 +54,7 @@ namespace PK.iOS.Views
          };
 
          titleLabel = new UILabel {
-            TextColor = Colors.LightWhite,
+            TextColor = Colors.InnerSpace,
             Font = Fonts.Medium.WithSize( 13 ),
          };
 

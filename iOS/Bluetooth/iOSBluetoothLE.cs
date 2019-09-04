@@ -4,6 +4,7 @@ using CoreBluetooth;
 using Foundation;
 using PK.Interfaces;
 using PK.Models;
+using PK.Helpers;
 
 namespace PK.iOS.Bluetooth
 {
@@ -32,6 +33,8 @@ namespace PK.iOS.Bluetooth
       public IBluetoothLEState StateDelegate { get; set; }
       public IBluetoothLEAdvertisement AdvertisementDelegate { get; set; }
 
+      private bool startScanWhenPoweredOn;
+
       public CBCentralManager CentralManager { get; private set; }
 
       public IOSBluetoothLE( )
@@ -50,36 +53,61 @@ namespace PK.iOS.Bluetooth
 
       public void ScanForAdvertisements( )
       {
-         CentralManager.ScanForPeripherals( peripheralUuids: null, options: scanningOptions );
+         if( CentralManager.IsScanning )
+            return;
+
+         startScanWhenPoweredOn = true;
+
+         if( ( CBManagerState )CentralManager.State == CBManagerState.PoweredOn )
+         {
+            CentralManager.ScanForPeripherals( peripheralUuids: null, options: scanningOptions );
+            Console.WriteLine( "iOS - STARTED scanning for advertiselments" );
+         }
+         else
+            Console.WriteLine( "iOS - Scanning will commence once Bluetooth is PoweredOn" );
       }
 
       public void StopScanningForAdvertisements( )
       {
-         Console.WriteLine( "iOS - Stop Scanning for advertisements." );
+         if( !CentralManager.IsScanning )
+            return;
+
+         startScanWhenPoweredOn = false;
+
          CentralManager.StopScan( );
+         Console.WriteLine( "iOS - STOPPED scanning for advertisements" );
       }
 
       #region CBCentralManagerDelegate
       public override void DiscoveredPeripheral( CBCentralManager central, CBPeripheral peripheral, NSDictionary advertisementData, NSNumber RSSI )
       {
+         // Filter by location name
+         var localName = advertisementData[ CBAdvertisement.DataLocalNameKey ] as NSString;
+
+         if( localName == null )
+            return;
+
+         var localNameString = localName.ToString( );
+
+         if( AnchorHelper.IsPKAnchor( localNameString ) )
+         {
 #if DEBUG
-         LogAdvertisementData( advertisementData, RSSI );
+            //LogAdvertisementData( advertisementData, RSSI );
 #endif
 
-         AdvertisementDelegate?.ReceivedAdvertisement( anchorLocationID: AnchorLocation.PassangerDoor, RSSI.Int32Value );
+            AdvertisementDelegate?.ReceivedPKAdvertisement( AnchorHelper.GetAnchorType( localNameString ), RSSI.Int32Value );
+         }
       }
 
       public override void UpdatedState( CBCentralManager central )
       {
-         Console.WriteLine( $"CBCentralManager State Updated: {( CBManagerState )CentralManager.State}" );
+         Console.WriteLine( $"iOS - CBCentralManager State Updated: {( CBManagerState )CentralManager.State}" );
 
          switch( ( CBManagerState )CentralManager.State )
          {
             case CBManagerState.PoweredOff:
                StateDelegate?.NotifyBluetoothIsOff( );
-
-               if( CentralManager.IsScanning )
-                  StopScanningForAdvertisements( );
+               StopScanningForAdvertisements( );
                break;
 
             case CBManagerState.Unsupported:
@@ -88,7 +116,12 @@ namespace PK.iOS.Bluetooth
 
             case CBManagerState.PoweredOn:
                StateDelegate?.NotifyBluetoothIsOn( );
-               //ScanForAdvertisements( );
+
+               if( startScanWhenPoweredOn )
+               {
+                  Console.WriteLine( "iOS - STARTED scanning for advertiselments" );
+                  CentralManager.ScanForPeripherals( peripheralUuids: null, options: scanningOptions );
+               }
                break;
 
             case CBManagerState.Resetting:
@@ -105,70 +138,74 @@ namespace PK.iOS.Bluetooth
 
       private void LogAdvertisementData( NSDictionary advertisementData, NSNumber RSSI )
       {
-         Console.WriteLine( advertisementData );
-
-         return;
          var stringBuilder = new StringBuilder( );
-         var rssi = RSSI;
-         stringBuilder.Append( $"RSSI: {rssi}" ).AppendLine( ).AppendLine( );
+
+         stringBuilder.AppendLine( );
+
+         stringBuilder.Append( $"----------------------------------------------------------------" ).AppendLine( );
 
          var localName = advertisementData[ CBAdvertisement.DataLocalNameKey ] as NSString;
-         stringBuilder.Append( $"Local Name: {localName}" ).AppendLine( ).AppendLine( );
+         stringBuilder.Append( $"Local Name: {localName}" ).AppendLine( );
 
-         var manufacturerData = advertisementData[ CBAdvertisement.DataManufacturerDataKey ] as NSData;
-         stringBuilder.Append( $"Manufacturer Data: {manufacturerData?.Description}" ).AppendLine( ).AppendLine( );
-
-         if( advertisementData[ CBAdvertisement.DataServiceDataKey ] is NSDictionary serviceData )
-         {
-            stringBuilder.Append( $"Service Data:" ).AppendLine( );
-            foreach( var pair in serviceData )
-            {
-               stringBuilder.Append( $"{pair.Key}: {pair.Value}" ).AppendLine( );
-            }
-            stringBuilder.AppendLine( );
-         }
-
-         if( advertisementData[ CBAdvertisement.DataServiceUUIDsKey ] is NSArray serviceUUIDs )
-         {
-            stringBuilder.Append( $"Service UUIDs:" ).AppendLine( );
-            for( nuint i = 0; i < serviceUUIDs.Count; i++ )
-            {
-               stringBuilder.Append( $"   {serviceUUIDs.ValueAt( i )}" ).AppendLine( );
-            }
-            stringBuilder.AppendLine( );
-         }
-
-         if( advertisementData[ CBAdvertisement.DataOverflowServiceUUIDsKey ] is NSArray overflowServiceUUIDs )
-         {
-            stringBuilder.Append( $"Overflow service UUIDs:" ).AppendLine( );
-            for( nuint i = 0; i < overflowServiceUUIDs.Count; i++ )
-            {
-               var cbuuid = overflowServiceUUIDs.GetItem<CBUUID>( i );
-               stringBuilder.Append( $"   {cbuuid.Uuid}" ).AppendLine( );
-            }
-            stringBuilder.AppendLine( );
-         }
+         var rssi = RSSI;
+         stringBuilder.Append( $"RSSI: {rssi}" ).AppendLine( );
 
          var txPowerLevel = advertisementData[ CBAdvertisement.DataTxPowerLevelKey ] as NSNumber;
-         stringBuilder.Append( $"Tx Power Level: {txPowerLevel}" ).AppendLine( ).AppendLine( );
+         if( txPowerLevel != null )
+            stringBuilder.Append( $"Tx Power Level: {txPowerLevel}" ).AppendLine( ).AppendLine( );
 
-         var isConnectable = advertisementData[ CBAdvertisement.DataTxPowerLevelKey ] as NSNumber;
-         stringBuilder.Append( $"Is Connectable: {isConnectable}" ).AppendLine( ).AppendLine( );
-
-         if( advertisementData[ CBAdvertisement.DataSolicitedServiceUUIDsKey ] is NSArray solicitedServiceUUIDs )
-         {
-            stringBuilder.Append( $"Solicited service UUIDs:" ).AppendLine( );
-            for( nuint i = 0; i < solicitedServiceUUIDs.Count; i++ )
-            {
-               var cbuuid = solicitedServiceUUIDs.GetItem<CBUUID>( i );
-               stringBuilder.Append( $"   {cbuuid.Uuid}" ).AppendLine( );
-            }
-            stringBuilder.AppendLine( );
-         }
+         var isConnectable = advertisementData[ CBAdvertisement.IsConnectable ] as NSNumber;
+         if( isConnectable != null )
+            stringBuilder.Append( $"Is Connectable: {isConnectable}" ).AppendLine( );
 
          stringBuilder.Append( $"----------------------------------------------------------------" ).AppendLine( );
 
          Console.WriteLine( stringBuilder );
+
+         //var manufacturerData = advertisementData[ CBAdvertisement.DataManufacturerDataKey ] as NSData;
+         //stringBuilder.Append( $"Manufacturer Data: {manufacturerData?.Description}" ).AppendLine( ).AppendLine( );
+
+         //if( advertisementData[ CBAdvertisement.DataServiceDataKey ] is NSDictionary serviceData )
+         //{
+         //   stringBuilder.Append( $"Service Data:" ).AppendLine( );
+         //   foreach( var pair in serviceData )
+         //   {
+         //      stringBuilder.Append( $"{pair.Key}: {pair.Value}" ).AppendLine( );
+         //   }
+         //   stringBuilder.AppendLine( );
+         //}
+
+         //if( advertisementData[ CBAdvertisement.DataServiceUUIDsKey ] is NSArray serviceUUIDs )
+         //{
+         //   stringBuilder.Append( $"Service UUIDs:" ).AppendLine( );
+         //   for( nuint i = 0; i < serviceUUIDs.Count; i++ )
+         //   {
+         //      stringBuilder.Append( $"   {serviceUUIDs.ValueAt( i )}" ).AppendLine( );
+         //   }
+         //   stringBuilder.AppendLine( );
+         //}
+
+         //if( advertisementData[ CBAdvertisement.DataOverflowServiceUUIDsKey ] is NSArray overflowServiceUUIDs )
+         //{
+         //   stringBuilder.Append( $"Overflow service UUIDs:" ).AppendLine( );
+         //   for( nuint i = 0; i < overflowServiceUUIDs.Count; i++ )
+         //   {
+         //      var cbuuid = overflowServiceUUIDs.GetItem<CBUUID>( i );
+         //      stringBuilder.Append( $"   {cbuuid.Uuid}" ).AppendLine( );
+         //   }
+         //   stringBuilder.AppendLine( );
+         //}
+
+         //if( advertisementData[ CBAdvertisement.DataSolicitedServiceUUIDsKey ] is NSArray solicitedServiceUUIDs )
+         //{
+         //   stringBuilder.Append( $"Solicited service UUIDs:" ).AppendLine( );
+         //   for( nuint i = 0; i < solicitedServiceUUIDs.Count; i++ )
+         //   {
+         //      var cbuuid = solicitedServiceUUIDs.GetItem<CBUUID>( i );
+         //      stringBuilder.Append( $"   {cbuuid.Uuid}" ).AppendLine( );
+         //   }
+         //   stringBuilder.AppendLine( );
+         //}
       }
    }
 }

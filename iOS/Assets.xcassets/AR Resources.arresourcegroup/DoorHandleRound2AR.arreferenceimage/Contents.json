@@ -1,0 +1,17 @@
+{
+  "images": [
+    {
+      "filename": "door_button2_rounded_AR.png",
+      "scale": "1x",
+      "idiom": "universal"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  },
+  "properties": {
+    "width": 2.0,
+    "unit": "centimeters"
+  }
+}

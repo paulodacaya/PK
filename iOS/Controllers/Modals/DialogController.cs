@@ -120,7 +120,7 @@ namespace PK.iOS.Controllers
       private void SetupViews( )
       {
          var containerView = new UIView {
-            BackgroundColor = Colors.White,
+            BackgroundColor = Colors.OuterSpaceLight,
             ClipsToBounds = true,
          };
          containerView.Layer.CornerRadius = Values.DialogCornerRadius;
@@ -128,20 +128,16 @@ namespace PK.iOS.Controllers
          titleLabel = new UILabel {
             Text = titleText,
             Font = Fonts.Bold.WithSize( 22f ),
-            TextColor = Colors.OuterSpace,
+            TextColor = Colors.White,
             Hidden = string.IsNullOrEmpty( messageText )
          };
 
          messageLabel = new UILabel {
             Text = messageText,
             Font = Fonts.Regular.WithSize( 16f ),
-            TextColor = Colors.AuroMetalSaurus,
+            TextColor = Colors.Gray,
             Lines = 0,
             Hidden = string.IsNullOrEmpty( messageText )
-         };
-
-         var buttonContainerView = new UIView {
-            BackgroundColor = Colors.OuterSpaceLight,
          };
 
          negativeButton = new UIButton( UIButtonType.System ) {
@@ -160,7 +156,6 @@ namespace PK.iOS.Controllers
          positiveButton.SetTitleColor( Colors.White, UIControlState.Normal );
          positiveButton.TouchUpInside += PostiveButtonTouchUpInside;
 
-
          var stackView = VStack(
             titleLabel,
             messageLabel,
@@ -173,10 +168,7 @@ namespace PK.iOS.Controllers
          containerView.Anchor( centerX: View.CenterXAnchor, centerY: View.CenterYAnchor,
             size: new CGSize( width: Math.Min( UIScreen.MainScreen.Bounds.Width - 80, 500 ), height: 0 ) );
 
-         containerView.AddSubviews( buttonContainerView, stackView );
-
-         buttonContainerView.Anchor( leading: containerView.LeadingAnchor, bottom: containerView.BottomAnchor,
-            trailing: containerView.TrailingAnchor, size: new CGSize( 0, 52 ) );
+         containerView.AddSubviews( stackView );
 
          stackView.FillSuperview( );
       }

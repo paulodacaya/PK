@@ -11,15 +11,21 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\HomeViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Calibration\CalibrateViewModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Calibration\DistanceTestViewModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Calibration\ManualCalibrationViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Calibration\CameraCalibrationViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Calibration\Zoning\ConfigureZonesViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\PKRealm.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Calibration.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Models\Zone.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Strings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IBluetoothLEAdvertisement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IBluetoothLEState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\AnchorLocation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Zone.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Calibration\CalibrationOnBoardingViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\SettingViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ListItemViewModel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Helpers\" />
   </ItemGroup>
 </Project>

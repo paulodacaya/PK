@@ -76,7 +76,7 @@ namespace PK.ViewModels
          viewModel.ZoneSelected( zoneModel.ZoneType, zoneModel.Distance, zoneModel.MinDistance, zoneModel.MaxDistance );
       }
 
-      public void DoneSelected( )
+      public void ActionSelected( )
       {
          var realm = Realm.GetInstance( PKRealm.Configuration );
 

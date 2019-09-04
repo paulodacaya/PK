@@ -1,64 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Realms;
+﻿using Realms;
 
 namespace PK.Models
 {
-   public static class AnchorLocation
+   public class Calibration : RealmObject
    {
-      public static int Master = 1;
-      public static int DriverDoor = 2;
-      public static int PassangerDoor = 3;
-   }
+      // There can only be a single calibration table with single row per device. Use the ID of 0.
+      public const int PrimaryKey = 0;
 
-   public class CalibrationData : RealmObject
-   {
       [PrimaryKey]
-      public int CalibrationID { get; set; }
-      public IList<CalibrationLocationData> LocationsData { get; }
-
-      public bool Completed 
-      {
-         get
-         {
-            foreach( var locationData in LocationsData )
-            {
-               if( !locationData.Completed )
-                  return false;
-            }
-
-            return true;
-         } 
-      }
-   }
-
-   public class CalibrationLocationData : RealmObject
-   {
-      [PrimaryKey]
-      public int LocationID { get; set; }
-      public IList<CalibrationDistanceData> DistancesData { get; }
-
-      public bool Completed
-      {
-         get
-         {
-            foreach( var distanceData in DistancesData )
-            {
-               if( !distanceData.Completed )
-                  return false;
-            }
-
-            return true;
-         }
-      }
-   }
-
-   public class CalibrationDistanceData : RealmObject
-   {
-      public int Distance { get; set; }
+      public int ID { get; set; }
+      public double MinKConstant { get; set; }
+      public double MaxKConstant { get; set; }
       public int MinRSSI { get; set; }
       public int MaxRSSI { get; set; }
-      public bool Completed { get; set; }
+
+      public bool IsCalibrated => MinKConstant > default( double ) && MaxKConstant > default( double );
+   }
+
+
+   /// <summary>
+   /// When mutliple achors are introduced. We will need 
+   /// </summary>
+   public class Node : RealmObject
+   {
+      [PrimaryKey]
+      public int ID { get; set; }
    }
 }
