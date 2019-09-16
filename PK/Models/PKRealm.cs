@@ -1,5 +1,6 @@
 ﻿using System;
 using Realms;
+using Xamarin.Essentials;
 
 namespace PK.Models
 {
@@ -30,14 +31,15 @@ namespace PK.Models
       {
          var realm = Realm.GetInstance( Configuration );
 
-         var calibration = realm.Find<Calibration>( Calibration.PrimaryKey );
+         var calibration = realm.Find<Calibration>( DeviceInfo.Model );
 
          if( calibration == null )
          {
+            Console.WriteLine( "PK - Creating new Calibration table." );
+
             realm.Write( ( ) => {
-               Console.WriteLine( "PK - Creating new Calibration table." );
                var newCalibration = new Calibration {
-                  ID = Calibration.PrimaryKey
+                  DeviceModel = DeviceInfo.Model
                };
 
                realm.Add( newCalibration );

@@ -30,18 +30,22 @@
 	<string>0.1.0</string>
 	<key>CFBundleVersion</key>
 	<string>0.1.3</string>
-	<key>UIStatusBarHidden</key>
-	<true/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Fonts/BrixSansBold.otf</string>
 		<string>Fonts/BrixSansMedium.otf</string>
 		<string>Fonts/BrixSansRegular.otf</string>
 		<string>Fonts/BrixSansRegularItalic.otf</string>
+		<string>Fonts/BoschSans-Bold.otf</string>
+		<string>Fonts/BoschSans-Light.otf</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>This application requires the camera.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>This application requires Bluetooth.</string>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<true/>
+	<key>UIStatusBarHidden</key>
+	<true/>
 </dict>
 </plist>

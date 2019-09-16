@@ -4,26 +4,16 @@ namespace PK.Models
 {
    public class Calibration : RealmObject
    {
-      // There can only be a single calibration table with single row per device. Use the ID of 0.
-      public const int PrimaryKey = 0;
-
       [PrimaryKey]
-      public int ID { get; set; }
-      public double MinKConstant { get; set; }
-      public double MaxKConstant { get; set; }
-      public int MinRSSI { get; set; }
-      public int MaxRSSI { get; set; }
+      public string DeviceModel { get; set; }
+      public int RSSI_0_5_m { get; set; }
+      public int RSSI_1_0_m { get; set; }
+      public int RSSI_1_5_m { get; set; }
+      public int RSSI_2_0_m { get; set; }
+      public int RSSI_2_5_m { get; set; }
+      public int RSSI_3_0_m { get; set; }
 
-      public bool IsCalibrated => MinKConstant > default( double ) && MaxKConstant > default( double );
-   }
-
-
-   /// <summary>
-   /// When mutliple achors are introduced. We will need 
-   /// </summary>
-   public class Node : RealmObject
-   {
-      [PrimaryKey]
-      public int ID { get; set; }
+      public bool IsCalibrated => RSSI_0_5_m < 0 && RSSI_1_0_m < 0 && RSSI_1_5_m < 0
+         && RSSI_2_0_m < 0 && RSSI_2_5_m < 0 && RSSI_3_0_m < 0;
    }
 }

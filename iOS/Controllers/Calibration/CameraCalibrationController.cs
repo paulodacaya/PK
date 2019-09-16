@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using ARKit;
+using CoreAnimation;
 using CoreGraphics;
 using Foundation;
 using PK.Helpers;
@@ -21,7 +23,7 @@ namespace PK.iOS.Controllers
       private const string ARResourceImageGroup = "AR Resources";
 
       private bool isRestartAvailable = true; // Prevents restarting the session while a restart is in progress.
-      private bool captureRSSI;
+      private bool canCaptureRSSI;
 
       private readonly CameraCalibrationViewModel viewModel;
 
@@ -32,92 +34,39 @@ namespace PK.iOS.Controllers
       {
          viewModel = new CameraCalibrationViewModel( this );
 
+         // Start scanning for BLE advertisements
          IOSBluetoothLE.Instance.AdvertisementDelegate = this;
          IOSBluetoothLE.Instance.ScanForAdvertisements( );
       }
 
-      public override bool PrefersStatusBarHidden( )
-      {
-         return true;
-      }
-
-      public override void ViewWillTransitionToSize( CGSize toSize, IUIViewControllerTransitionCoordinator coordinator )
-      {
-         base.ViewWillTransitionToSize( toSize, coordinator );
-
-         coordinator.AnimateAlongsideTransition( ( IUIViewControllerTransitionCoordinatorContext context ) => {
-
-            var orientation = UIApplication.SharedApplication.StatusBarOrientation;
-
-            NavigationController.SetNavigationBarHidden( hidden: orientation == UIInterfaceOrientation.LandscapeLeft
-               || orientation == UIInterfaceOrientation.LandscapeRight, animated: true );
-
-         }, completion: null );
-      }
+      public override UIStatusBarStyle PreferredStatusBarStyle( ) => UIStatusBarStyle.LightContent;
 
       public override void ViewDidLoad( )
       {
          base.ViewDidLoad( );
 
-         SetupNavigation( );
-         SetupViews( );
-      }
-
-      public override void ViewWillAppear( bool animated )
-      {
-         base.ViewWillAppear( animated );
-         NavigationController.SetNavigationBarHidden( false, animated: true );
+         SetupSceneViewAndController( );
       }
 
       public override void ViewDidAppear( bool animated )
       {
          base.ViewDidAppear( animated );
-         // Prevent the screen from dimming to avoid interuppting the AR experience.
-         UIApplication.SharedApplication.IdleTimerDisabled = true;
 
-         // Start AR caibration experience.
-         ResetTracking( );
+         //// Prevent the screen from dimming to avoid interupting the AR experience.
+         //UIApplication.SharedApplication.IdleTimerDisabled = true;
 
-         // Start guidance animation prompt.
-         cameraCalibrationStatusController.StartGuidancePrompt( );
-      }
-
-      public override void ViewWillDisappear( bool animated )
-      {
-         base.ViewWillDisappear( animated );
-         NavigationController.SetNavigationBarHidden( true, animated: true );
+         //// Start AR caibration experience.
+         //ResetTracking( );
       }
 
       public override void ViewDidDisappear( bool animated )
       {
          base.ViewDidDisappear( animated );
+
          sceneView.Session.Pause( );
       }
 
-      private void SetupNavigation( )
-      {
-         var backButton = new UIButton( UIButtonType.System ) {
-            ContentEdgeInsets = new UIEdgeInsets( 0, 0, 0, 0 ),
-            TintColor = Colors.White,
-         };
-         backButton.SetImage( Images.ChevronLeft, UIControlState.Normal );
-         backButton.WithSquareSize( 22 );
-         backButton.TouchUpInside += HandleBackButtonTouchUpInside;
-
-         var restartButton = new UIButton( UIButtonType.System ) {
-            ContentEdgeInsets = new UIEdgeInsets( 0, 0, 0, 0 ),
-            TintColor = Colors.White,
-         };
-         restartButton.SetImage( Images.Restart, UIControlState.Normal );
-         restartButton.ImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
-         restartButton.WithSquareSize( 22 );
-         restartButton.TouchUpInside += HandleRestartButtonTouchUpInside;
-
-         NavigationItem.LeftBarButtonItem = new UIBarButtonItem( customView: backButton );
-         NavigationItem.RightBarButtonItem = new UIBarButtonItem( customView: restartButton );
-      }
-
-      private void SetupViews( )
+      private void SetupSceneViewAndController( )
       {
          sceneView = new ARSCNView( );
 
@@ -125,6 +74,7 @@ namespace PK.iOS.Controllers
          sceneView.Session.Delegate = this;
 
          cameraCalibrationStatusController = new CameraCalibrationStatusController( viewModel );
+         cameraCalibrationStatusController.View.PreservesSuperviewLayoutMargins = true;
 
          AddChildViewController( cameraCalibrationStatusController );
          View.AddSubviews( sceneView, cameraCalibrationStatusController.View );
@@ -132,8 +82,7 @@ namespace PK.iOS.Controllers
 
          sceneView.FillSuperview( );
 
-         cameraCalibrationStatusController.View.Anchor( leading: View.LeadingAnchor, top: View.LayoutMarginsGuide.TopAnchor,
-            trailing: View.TrailingAnchor, bottom: View.LayoutMarginsGuide.BottomAnchor );
+         cameraCalibrationStatusController.View.FillSuperview( );
       }
 
       private void ResetTracking( )
@@ -150,8 +99,6 @@ namespace PK.iOS.Controllers
 
             sceneView.Session.Run( configuration, options: ARSessionRunOptions.ResetTracking | ARSessionRunOptions.RemoveExistingAnchors );
          }
-
-         cameraCalibrationStatusController.ShowGuidancePrompt( );
       }
 
       public void RestartARExperience( )
@@ -179,10 +126,6 @@ namespace PK.iOS.Controllers
       #region Event Handlers
       private void HandleBackButtonTouchUpInside( object sender, EventArgs e )
       {
-         // TODO Handle orientation lock
-         // Lock orientation back to default (portrait) and force rotate it.
-         // OrienationHelper.LockOrientation( UIInterfaceOrientationMask.Portrait, rotateToOrientation: UIInterfaceOrientationMask.Portrait );
-
          NavigationController.PopViewController( animated: true );
       }
 
@@ -226,7 +169,7 @@ namespace PK.iOS.Controllers
       [Export( "renderer:didUpdateNode:forAnchor:" )]
       public void DidUpdateNode( ISCNSceneRenderer renderer, SCNNode node, ARAnchor anchor )
       {
-         // Using Anchors to determine distance
+         // Using Anchors to determine distance.
          using( var cameraFrame = sceneView.Session.CurrentFrame )
          {
             var imageAnchor = anchor as ARImageAnchor;
@@ -237,14 +180,13 @@ namespace PK.iOS.Controllers
 
             var cameraToImageDistance = cameraAnchorPosition - imageAnchorPosition;
 
-            var cameraToImageDistance2d = Math.Round( cameraToImageDistance.Length, 2 );
+            var cameraToImageDistanceRounded = Math.Round( cameraToImageDistance.Length, 2 );
 
-            // Allow to capture RSSI from BLE advertisements if distance is 0.5m
-            // EPSILON is used to compare double values
-            captureRSSI = Math.Abs( cameraToImageDistance2d - viewModel.RSSICapturableDistance ) < double.Epsilon;
+            // Allow to capture RSSI from BLE advertisements if distance is 0.5m. EPSILON is used to compare double values.
+            canCaptureRSSI = Math.Abs( cameraToImageDistanceRounded - viewModel.RSSICapturableDistance ) < double.Epsilon;
 
-            cameraCalibrationStatusController.ShowDistanceMessage( cameraToImageDistance2d.ToString( ) );
-            cameraCalibrationStatusController.IsCapturingRSSI = captureRSSI;
+            cameraCalibrationStatusController.UpdateDistanceMessage( $"{cameraToImageDistanceRounded}m" );
+            cameraCalibrationStatusController.NotifyUiState( canCaptureRSSI );
          }
       }
       #endregion
@@ -255,15 +197,15 @@ namespace PK.iOS.Controllers
       {
          var imageAnchor = anchors[ 0 ] as ARImageAnchor;
 
-         if( imageAnchor.IsTracked )
-            cameraCalibrationStatusController.HideGuidancePrompt( );
-         else
+         if( !imageAnchor.IsTracked )
          {
-            captureRSSI = false;
-            cameraCalibrationStatusController.IsCapturingRSSI = false;
-            cameraCalibrationStatusController.ShowGuidancePrompt( );
-            cameraCalibrationStatusController.HideDistanceMessage( );
-         }
+            if( canCaptureRSSI )
+            {
+               canCaptureRSSI = false;
+               cameraCalibrationStatusController.UpdateDistanceMessage( $"Find the Tracker" );
+               cameraCalibrationStatusController.NotifyUiState( canCaptureRSSI );
+            }
+         }  
       }
       #endregion
 
@@ -306,24 +248,20 @@ namespace PK.iOS.Controllers
 
       public void ShowErrorMessageDialog( string message )
       {
-         var errorDialogController = new DialogController {
-            TitleText = "Opps, an error has occured!",
-            MessageText = message,
-            NegativeButtonHidden = true,
-            PositiveText = "Try Again",
-         };
-
-         errorDialogController.OnPositiveButtonTouchUpInside += ( sender, e ) => {
+         var errorAlertController = UIAlertController.Create( "Opps, an error has occured!", message, UIAlertControllerStyle.Alert );
+         errorAlertController.AddAction( UIAlertAction.Create( "Try Again", UIAlertActionStyle.Default, alertAction => {
             RestartARExperience( );
-         };
+         } ) );
 
-         PresentViewController( errorDialogController, animated: true, completionHandler: null );
+         PresentViewController( errorAlertController, animated: true, completionHandler: null );
       }
 
       void IBluetoothLEAdvertisement.ReceivedPKAdvertisement( Anchor anchor, int RSSI )
       {
-         if( captureRSSI )
+         if( canCaptureRSSI )
+         {
             viewModel.calibrateRSSI( RSSI );
+         }
       }
 
       void ICameraCalibrationViewModel.UpdateCalibrationProgress( float percent )
@@ -333,7 +271,7 @@ namespace PK.iOS.Controllers
 
       void ICameraCalibrationViewModel.StopAdvertisingAndReset( )
       {
-         captureRSSI = false;
+         canCaptureRSSI = false;
          IOSBluetoothLE.Instance.StopScanningForAdvertisements( );
 
          using( var configuration = new ARImageTrackingConfiguration( ) )
@@ -346,253 +284,234 @@ namespace PK.iOS.Controllers
 
       void ICameraCalibrationViewModel.ShowCalibrationCompleted( )
       {
-         UIView.AnimateNotify( duration: 0.5, delay: 0, options: UIViewAnimationOptions.CurveEaseOut, animation: ( ) => {
-
-            cameraCalibrationStatusController.View.Alpha = 0;
-
-         }, completion: finished => {
-
-            NavigationController.SetNavigationBarHidden( true, animated: true );
-
-            var cameraCalibrationPopUpController = new CameraCalibrationPopUpController( viewModel );
-            PresentViewController( cameraCalibrationPopUpController, animated: false, completionHandler: null );
-
-         } );
+         cameraCalibrationStatusController.NotifyCalibrationCompleted( );
       }
 
       void ICameraCalibrationViewModel.NavigateToHome( )
       {
          var homeController = new HomeController( );
-         NavigationController.PushViewController( homeController, animated: true );
-      }
 
-      void ICameraCalibrationViewModel.NavigateToConfigureZones( )
-      {
+         if( PresentingViewController is UINavigationController navigationController )
+            navigationController.PushViewController( homeController, animated: true );
       }
    }
 
    public class CameraCalibrationStatusController : UIViewController
    {
-      public bool IsCapturingRSSI
-      {
-         get => calibrationDistanceContainerView.BackgroundColor == Colors.BoschDarkGreen;
-         set
-         {
-            InvokeOnMainThread( ( ) => {
-               calibrationDistanceContainerView.BackgroundColor = value ? Colors.BoschDarkGreen : Colors.White;
-            } );
-         }
-      }
+      private readonly CameraCalibrationViewModel viewModel;
 
+      // UI Elements
       public UIProgressView ProgressView;
 
+      private AnchoredConstraints topContainerViewAnchoredConstraints;
+      private UILabel titleLabel;
+      private UILabel subTitleLabel;
+      private UILabel rssi_1_0_m_Label;
+      private UIButton closeButton;
+      private List<UIView> calibrationCompletedViews;
+
+      private UIView frameView;
+      private CAShapeLayer dashLineShapeLayer;
       private UILabel infoLabel;
-      private UIView calibrationDistanceInfoLabel;
-      private UIView calibrationDistanceContainerView;
-      private UILabel calibrationDistanceDistanceLabel;
-      private UIStackView guidanceStackView;
-      private UILabel guidanceMessageLabel;
-
-      private UIImageView flashlightImageView;
-      private bool IsFlashlightOn;
-
-      private readonly CameraCalibrationViewModel viewModel;
+      private UILabel distanceLabel;
+      private UIActivityIndicatorView activityIndicatorView;
+      private UIButton flashLightButton;
 
       public CameraCalibrationStatusController( CameraCalibrationViewModel viewModel )
       {
          this.viewModel = viewModel;
+
+         calibrationCompletedViews = new List<UIView>( );
       }
 
       public override void ViewDidLoad( )
       {
          base.ViewDidLoad( );
 
-         SetupButtomToolBar( );
-         SetupCalibrationView( );
-         SetupGuidancePrompt( );
+         SetupTopCalibrationView( );
+         SetupCentreCalibrationView( );
+         SetupFlashlight( );
       }
 
-      private void SetupButtomToolBar( )
+      public override void ViewDidAppear( bool animated )
       {
-         infoLabel = new UILabel {
-            Font = Fonts.Medium.WithSize( 17 ),
-            TextColor = Colors.White,
-         };
-         infoLabel.WithWidth( 300 );
+         base.ViewDidAppear( animated );
 
-         flashlightImageView = new UIImageView {
-            UserInteractionEnabled = true,
-            Image = Images.FlashlightOff,
-            ContentMode = UIViewContentMode.ScaleAspectFit,
-            TintColor = Colors.White,
-         };
-         flashlightImageView.WithSquareSize( 24 );
-
-         var tapGesture = new UITapGestureRecognizer( HandleFlashlightTap );
-         flashlightImageView.AddGestureRecognizer( tapGesture );
-
-         var bottomToolbar = new UIToolbar {
-            Items = new UIBarButtonItem[ ] {
-               new UIBarButtonItem( customView: infoLabel ),
-               new UIBarButtonItem( UIBarButtonSystemItem.FlexibleSpace ),
-               new UIBarButtonItem( customView: flashlightImageView )
-            },
-            BackgroundColor = Colors.Clear,
-            ClipsToBounds = true,
-         };
-         bottomToolbar.SetBackgroundImage( new UIImage( ), UIToolbarPosition.Any, UIBarMetrics.Default );
-
-         View.AddSubview( bottomToolbar );
-
-         bottomToolbar.Anchor( leading: View.LeadingAnchor, bottom: View.LayoutMarginsGuide.BottomAnchor, trailing: View.TrailingAnchor );
+         // Testing purposes only.
+         Task.Delay( 2000 ).ContinueWith( task => {
+            NotifyCalibrationCompleted( );
+         } );
       }
 
-      private void SetupCalibrationView( )
+      private void SetupTopCalibrationView( )
       {
-         var progressContainerView = new UIView {
+         var containerView = new UIView {
+            PreservesSuperviewLayoutMargins = true,
             BackgroundColor = Colors.White
          };
-         progressContainerView.WithCornerRadius( Values.CornerRadius );
-         progressContainerView.WithShadow( opacity: 0.4f, radius: Values.CornerRadius, offset: new CGSize( 0, 2 ), color: Colors.White );
 
-         var progressLabel = new UILabel {
-            Text = "Calibration progress:",
-            TextColor = Colors.OuterSpace,
-            Font = Fonts.Medium.WithSize( 17 )
+         View.AddSubview( containerView );
+
+         topContainerViewAnchoredConstraints = containerView.FillSuperview( padding: new UIEdgeInsets( 0, 0, View.Frame.Height * 0.83f, 0 ) );
+
+         var statusBarImageView = new UIImageView {
+            Image = Images.BoschSuperGraphic,
+            ContentMode = UIViewContentMode.ScaleAspectFill,
+            ClipsToBounds = true
          };
 
-         ProgressView = new UIProgressView( style: UIProgressViewStyle.Bar ) {
-            ProgressTintColor = Colors.BoschDarkGreen,
-            TrackTintColor = Colors.LightWhite,
-            ClipsToBounds = true,
-         };
-         ProgressView.WithHeight( 4 );
-         ProgressView.WithCornerRadius( Values.CornerRadius );
+         containerView.AddSubview( statusBarImageView );
 
-         progressContainerView.AddSubviews( ProgressView, progressLabel );
+         statusBarImageView.Anchor( leading: containerView.LeadingAnchor, top: containerView.TopAnchor, trailing: containerView.TrailingAnchor,
+            size: new CGSize( 0, UIApplication.SharedApplication.StatusBarFrame.Height ) );
 
-         ProgressView.Anchor( leading: progressContainerView.LeadingAnchor, bottom: progressContainerView.BottomAnchor,
-            trailing: progressContainerView.TrailingAnchor );
+         titleLabel = Components.UILabel( "Calibration Progress", Colors.BoschBlue, Fonts.BoschLight.WithSize( 18 ) );
+         subTitleLabel = Components.UILabel( "Track the image and hold at 1 metre.", Colors.BoschBlack, Fonts.BoschLight.WithSize( 15 ) );
 
-         progressLabel.Anchor( leading: progressContainerView.LeadingAnchor, top: progressContainerView.TopAnchor,
-            trailing: progressContainerView.TrailingAnchor, bottom: ProgressView.TopAnchor, padding: new UIEdgeInsets( 8, 8, 8, 8 ) );
+         var messagesLabel = Components.UILabel( viewModel.Message, Colors.BoschBlue, Fonts.BoschLight.WithSize( 15 ) );
+         messagesLabel.Hidden = true;
 
-         calibrationDistanceInfoLabel = new UILabel {
-            Font = Fonts.Medium.WithSize( 17 ),
-            Text = "Hold at 0.5 metres.",
-            TextColor = Colors.White,
-            Alpha = 0
-         };
+         var pkImageView = Components.UIImageView( Images.PK3, Colors.BoschBlue );
+         pkImageView.Hidden = true;
 
-         calibrationDistanceContainerView = new UIView {
-            BackgroundColor = Colors.White,
-            Alpha = 0
-         };
-         calibrationDistanceContainerView.WithCornerRadius( Values.CornerRadius );
-         calibrationDistanceContainerView.WithShadow( opacity: 0.4f, radius: Values.CornerRadius, offset: new CGSize( 0, 2 ), color: Colors.White );
+         rssi_1_0_m_Label = Components.UILabel( "NaN", Colors.BoschBlack, Fonts.BoschLight.WithSize( 15 ), textAlignment: UITextAlignment.Right );
 
-         calibrationDistanceDistanceLabel = new UILabel {
-            Font = Fonts.Medium.WithSize( 17 ),
-            TextColor = Colors.OuterSpace,
-            TextAlignment = UITextAlignment.Center
+         var rssi_1_0_m_StackView = HStack(
+            Components.UILabel( "1m:", Colors.BoschBlue, Fonts.BoschLight.WithSize( 15 ) ),
+            new UIView( ),
+            rssi_1_0_m_Label
+         );
+         rssi_1_0_m_StackView.Hidden = true;
+
+         closeButton = Components.UIButton( Images.Close, Colors.BoschBlue );
+         closeButton.TouchUpInside += ( sender, eventArgs ) => {
+            DismissViewController( animated: true, completionHandler: null );
          };
 
-         calibrationDistanceContainerView.AddSubviews( calibrationDistanceDistanceLabel );
+         var finishedButton = Components.UIButton( "Finished", Colors.BoschBlue, Fonts.BoschLight.WithSize( 16 ), new UIEdgeInsets( 12, 0, 12, 0 ) );
+         finishedButton.WithBorder( 1, Colors.BoschBlue );
+         finishedButton.WithCornerRadius( Values.CornerRadius );
+         finishedButton.Hidden = true;
+         finishedButton.TouchUpInside += ( sender, eventArgs ) => {
+            viewModel.ActionFinished( );
+            DismissViewController( animated: true, completionHandler: null );
+         };
 
-         calibrationDistanceDistanceLabel.FillSuperview( padding: new UIEdgeInsets( 8, 12, 8, 12 ) );
+         calibrationCompletedViews.Add( messagesLabel );
+         calibrationCompletedViews.Add( pkImageView );
+         calibrationCompletedViews.Add( rssi_1_0_m_StackView );
+         calibrationCompletedViews.Add( finishedButton );
 
          var stackView = VStack(
-            progressContainerView,
             HStack(
-               calibrationDistanceInfoLabel,
-               new UIView( ),
-               calibrationDistanceContainerView
-            ).With( alignment: UIStackViewAlignment.Center )
-         ).With( spacing: 8 );
+               titleLabel,
+               closeButton.WithSquareSize( 18 )
+            ).With( alignment: UIStackViewAlignment.Center ),
+            subTitleLabel,
+            messagesLabel,
+            pkImageView.WithHeight( 150 ),
+            rssi_1_0_m_StackView,
+            new UIView( ),
+            finishedButton
+         ).With( spacing: 12 ).WithPadding( new UIEdgeInsets( 12, 0, 12, 0 ) );
 
-         View.AddSubview( stackView );
+         containerView.AddSubview( stackView );
 
-         stackView.Anchor( leading: View.LayoutMarginsGuide.LeadingAnchor, top: View.LayoutMarginsGuide.TopAnchor,
-            trailing: View.LayoutMarginsGuide.TrailingAnchor, padding: new UIEdgeInsets( 8, 0, 0, 0 ) );
-      }
+         stackView.Anchor( leading: containerView.LayoutMarginsGuide.LeadingAnchor, top: statusBarImageView.BottomAnchor,
+            trailing: containerView.LayoutMarginsGuide.TrailingAnchor, bottom: containerView.BottomAnchor );
 
-      private void SetupGuidancePrompt( )
-      {
-         guidanceMessageLabel = new UILabel {
-            Text = "Find the marker",
-            TextColor = Colors.White.ColorWithAlpha( 0.8f ),
-            Font = Fonts.Medium.WithSize( 26 )
+         ProgressView = new UIProgressView( UIProgressViewStyle.Bar ) {
+            ProgressTintColor = Colors.BoschLightPurple,
+            TrackTintColor = Colors.BoschGray.ColorWithAlpha( 0.5f ),
+            ClipsToBounds = true,
          };
 
-         guidanceStackView = VStack(
-            guidanceMessageLabel
-         ).With( spacing: 18, alignment: UIStackViewAlignment.Center );
-         guidanceStackView.Hidden = true;
+         containerView.AddSubview( ProgressView );
 
-         View.AddSubview( guidanceStackView );
-
-         guidanceStackView.CenterInSuperView( );
+         ProgressView.Anchor( leading: containerView.LeadingAnchor, trailing: containerView.TrailingAnchor,
+            bottom: containerView.BottomAnchor, size: new CGSize( 0, 4 ) );
       }
 
-      private void HandleFlashlightTap( )
+      private void SetupCentreCalibrationView( )
       {
-         try
-         {
-            if( IsFlashlightOn )
+         frameView = new UIView( );
+
+         infoLabel = Components.UILabel( "Tracking Normal", Colors.White, Fonts.BoschBold.WithSize( 15 ) );
+         infoLabel.Alpha = 0;
+         distanceLabel = Components.UILabel( "Find the Tracker", Colors.White, Fonts.BoschBold.WithSize( 15 ) );
+         activityIndicatorView = new UIActivityIndicatorView( UIActivityIndicatorViewStyle.White );
+         activityIndicatorView.HidesWhenStopped = true;
+
+         View.AddSubview( frameView );
+
+         frameView.CenterInSuperView( size: new CGSize( View.Frame.Width - 40, 250 ) );
+
+         frameView.AddSubviews( infoLabel, distanceLabel, activityIndicatorView );
+
+         infoLabel.Anchor( leading: frameView.LeadingAnchor, bottom: frameView.BottomAnchor,
+            trailing: frameView.TrailingAnchor, padding: new UIEdgeInsets( 0, 12, 8, 12 ) );
+
+         distanceLabel.Anchor( centerX: frameView.CenterXAnchor, top: frameView.TopAnchor, padding: new UIEdgeInsets( 8, 0, 0, 0 ) );
+
+         activityIndicatorView.Anchor( bottom: frameView.BottomAnchor, trailing: frameView.TrailingAnchor,padding: new UIEdgeInsets( 0, 0, 12, 12 ) );
+
+         // Add dashed line shape layer to frameView
+
+         View.LayoutIfNeeded( );
+
+         dashLineShapeLayer = new CAShapeLayer {
+            StrokeColor = Colors.White.CGColor,
+            LineDashPattern = new NSNumber[ ] { 6, 3 },
+            LineWidth = 2,
+            FillColor = Colors.Clear.CGColor,
+            Path = UIBezierPath.FromRoundedRect( frameView.Bounds, cornerRadius: 20 ).CGPath,
+         };
+
+         frameView.Layer.AddSublayer( dashLineShapeLayer );
+      }
+
+      private void SetupFlashlight( )
+      {
+         flashLightButton = new UIButton( UIButtonType.System );
+         flashLightButton.SetImage( Images.FlashlightOff, UIControlState.Normal );
+         flashLightButton.SetImage( Images.Flashlight, UIControlState.Selected );
+         flashLightButton.TintColor = Colors.White;
+         flashLightButton.ImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
+         flashLightButton.ContentEdgeInsets = new UIEdgeInsets( 0, 0, 0, 0 );
+         flashLightButton.TouchUpInside += ( sender, e ) => {
+            try
             {
-               Flashlight.TurnOffAsync( );
-               flashlightImageView.Image = Images.FlashlightOff;
-               flashlightImageView.TintColor = Colors.White;
+               if( flashLightButton.Selected )
+               {
+                  Flashlight.TurnOffAsync( );
+                  flashLightButton.Selected = false;
+                  flashLightButton.ImageView.TintColor = Colors.White;
+               }
+               else
+               {
+                  Flashlight.TurnOnAsync( );
+                  flashLightButton.Selected = true;
+                  flashLightButton.ImageView.TintColor = Colors.BoschBlue;
+               }
             }
-            else
+            catch( FeatureNotSupportedException )
             {
-               Flashlight.TurnOnAsync( );
-               flashlightImageView.Image = Images.Flashlight;
-               flashlightImageView.TintColor = Colors.OuterSpace;
+               ShowInfoMessage( "Flashlight not supported on your device." );
             }
+            catch( PermissionException )
+            {
+               ShowInfoMessage( "No permissions." );
+            }
+            catch( Exception )
+            {
+               ShowInfoMessage( "Unable to turn on/off flashlight." );
+            }
+         };
 
-            IsFlashlightOn = !IsFlashlightOn;
-         }
-         catch( FeatureNotSupportedException )
-         {
-            ShowInfoMessage( "Flashlight not supported on your device." );
-         }
-         catch( PermissionException )
-         {
-            ShowInfoMessage( "No permissions." );
-         }
-         catch( Exception )
-         {
-            ShowInfoMessage( "Unable to turn on/off flashlight." );
-         }
-      }
+         View.AddSubview( flashLightButton );
 
-      public void StartGuidancePrompt( )
-      {
-         UIView.AnimateNotify( duration: 1, delay: 0, options: UIViewAnimationOptions.Autoreverse |
-            UIViewAnimationOptions.Repeat | UIViewAnimationOptions.CurveEaseInOut, animation: ( ) => {
-               guidanceMessageLabel.Alpha = 0;
-            }, completion: null );
-      }
-
-      public void ShowGuidancePrompt( )
-      {
-         if( !guidanceStackView.Hidden )
-            return;
-
-         InvokeOnMainThread( ( ) => {
-            guidanceStackView.Hidden = false;
-         } );
-      }
-
-      public void HideGuidancePrompt( )
-      {
-         if( guidanceStackView.Hidden )
-            return;
-
-         InvokeOnMainThread( ( ) => {
-            guidanceStackView.Hidden = true;
-         } );
+         flashLightButton.Anchor( trailing: View.LayoutMarginsGuide.TrailingAnchor, bottom: View.LayoutMarginsGuide.BottomAnchor,
+            padding: new UIEdgeInsets( 0, 0, 8, 8 ), size: new CGSize( 30, 30 ) );
       }
 
       public void ShowTrackingQualityInfo( ARTrackingState trackingState, ARTrackingStateReason trackingStateReason )
@@ -602,30 +521,59 @@ namespace PK.iOS.Controllers
 
       public void ShowInfoMessage( string message )
       {
-         infoLabel.Text = message;
-         infoLabel.Alpha = 1;
-
-         // Hide Info Message message after delay
-         DelayAnimate( animation: ( ) => {
-            infoLabel.Alpha = 0;
-         }, completion: null );
-      }
-
-      public void ShowDistanceMessage( string distance )
-      {
          InvokeOnMainThread( ( ) => {
-            calibrationDistanceInfoLabel.Alpha = 1;
-            calibrationDistanceContainerView.Alpha = 1;
-            calibrationDistanceDistanceLabel.Text = $"{distance}m";
+            infoLabel.Text = message;
+            infoLabel.Alpha = 1;
+            DelayAnimate( ( ) => infoLabel.Alpha = 0, null );
          } );
       }
 
-      public void HideDistanceMessage( )
+      public void NotifyUiState( bool isCapturing )
       {
-         DelayAnimate( animation: ( ) => {
-            calibrationDistanceInfoLabel.Alpha = 0;
-            calibrationDistanceContainerView.Alpha = 0;
-         }, completion: null );
+         InvokeOnMainThread( ( ) => {
+            if( isCapturing )
+            {
+               distanceLabel.TextColor = Colors.BoschLightGreen;
+               dashLineShapeLayer.StrokeColor = Colors.BoschLightGreen.CGColor;
+               if( !activityIndicatorView.IsAnimating )
+                  activityIndicatorView.StartAnimating( );
+            }
+            else
+            {
+               distanceLabel.TextColor = Colors.White;
+               dashLineShapeLayer.StrokeColor = Colors.White.CGColor;
+               if( activityIndicatorView.IsAnimating )
+                  activityIndicatorView.StopAnimating( );
+            }
+         } );  
+      }
+
+      public void UpdateDistanceMessage( string message )
+      {
+         InvokeOnMainThread( ( ) => {
+            distanceLabel.Text = message;
+         } );
+      }
+
+      public void NotifyCalibrationCompleted( )
+      {
+         InvokeOnMainThread( ( ) => {
+            titleLabel.Text = "Calibration Completed";
+            subTitleLabel.Text = "The calibration has been successful.";
+            rssi_1_0_m_Label.Text = viewModel.CalibrationData.RSSI_0_5_m.ToString( );
+            closeButton.Hidden = true;
+            ProgressView.Hidden = true;
+            frameView.Hidden = true;
+            flashLightButton.Hidden = true;
+
+            UIView.AnimateNotify( duration: 0.5, delay: 0, options: UIViewAnimationOptions.CurveEaseOut, animation: ( ) => {
+               topContainerViewAnchoredConstraints.Bottom.Constant = -View.Frame.Height * 0.25f;
+               View.LayoutIfNeeded( );
+            }, completion: finished => {
+               foreach( var view in calibrationCompletedViews )
+                  view.Hidden = false;
+            } );
+         } );
       }
 
       private void DelayAnimate( Action animation, UICompletionHandler completion )
@@ -634,160 +582,6 @@ namespace PK.iOS.Controllers
             InvokeOnMainThread( ( ) => {
                UIView.AnimateNotify( duration: 0.2, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animation, completion );
             } );
-         } );
-      }
-   }
-
-   public class CameraCalibrationPopUpController : UIViewController
-   {
-      private readonly CameraCalibrationViewModel viewModel;
-
-      private UIView containerView;
-      private nfloat containerViewHeight;
-      private AnchoredConstraints containerAnchoredConstraints;
-      private CircularCheckBox statusCheckBox;
-      private UIButton actionButton;
-
-      public CameraCalibrationPopUpController( CameraCalibrationViewModel viewModel )
-      {
-         this.viewModel = viewModel;
-      }
-
-      public override void ViewDidLoad( )
-      {
-         base.ViewDidLoad( );
-
-         SetupContent( );
-         SetupActionButton( );
-      }
-
-      public override void ViewDidAppear( bool animated )
-      {
-         base.ViewDidAppear( animated );
-
-         PresentPopUp( );
-      }
-
-      private void SetupContent( )
-      {
-         containerViewHeight = View.Frame.Height * 0.75f;
-
-         containerView = new UIView {
-            BackgroundColor = Colors.OuterSpace,
-         };
-
-         var titleLabel = new PKLabel( "Calibration Information", Colors.White, Fonts.Bold.WithSize( 24 ) );
-         statusCheckBox = new CircularCheckBox( );
-         var statusLabel = new PKLabel( "Status: COMPLETED", Colors.Gray, Fonts.Medium.WithSize( 18 ) );
-         var nodeImageView = new PKImageView( Images.CircleSlice, Colors.White );
-         var nodeStatusLabel = new PKLabel( "Central Node: -19.6", Colors.Gray, Fonts.Medium.WithSize( 18 ) );
-         var calibrationMessage = new PKLabel( "To re-calibrate your device, find the option in settings. You will perform the same operation.", Colors.White, Fonts.Regular.WithSize( 16 ) );
-         var divider = new UIView { BackgroundColor = Colors.InnerSpace };
-         var customiseZonesLabel = new PKLabel( "Customise Vehicle Zones", Colors.White, Fonts.Bold.WithSize( 20 ) );
-         var customiseZonesMessageLabel = new PKLabel( "You can now customise your vehicle zones. This will determine the range in which your mobile is considered within the vehicle's zone. Using default zones will skip to your home screen.", Colors.White, Fonts.Regular.WithSize( 16 ) );
-
-         var defaultZonesButton = new UIButton( UIButtonType.System );
-         defaultZonesButton.SetAttributedTitle( new NSAttributedString(
-            str: "Use Default Zones",
-            font: Fonts.Regular.WithSize( 17 ),
-            foregroundColor: Colors.White,
-            underlineStyle: NSUnderlineStyle.Single
-         ), UIControlState.Normal );
-         defaultZonesButton.TouchUpInside += HandleDefaultZonesButtonTouchUpInside;
-
-         var stackView = VStack(
-            titleLabel,
-            HStack( statusCheckBox.WithSquareSize( 16 ), statusLabel ).With( spacing: 10 ),
-            HStack( nodeImageView.WithSquareSize( 16 ), nodeStatusLabel ).With( spacing: 10 ),
-            calibrationMessage,
-            divider.WithHeight( 0.5f ),
-            customiseZonesLabel,
-            customiseZonesMessageLabel,
-            defaultZonesButton,
-            new UIView( )
-         ).With( spacing: 20 ).WithPadding( new UIEdgeInsets( 20, 0, 20, 0 ) );
-
-         View.AddSubview( containerView );
-
-         containerAnchoredConstraints = containerView.Anchor( leading: View.LeadingAnchor, bottom: View.BottomAnchor,
-            trailing: View.TrailingAnchor, size: new CGSize( 0, containerViewHeight ),
-            padding: new UIEdgeInsets( 0, 0, -containerViewHeight, 0 ) );
-
-         View.LayoutIfNeeded( );
-
-         containerView.CornerRadius( UIRectCorner.TopLeft | UIRectCorner.TopRight, Values.DialogCornerRadius );
-
-         containerView.AddSubview( stackView );
-
-         stackView.Anchor( leading: View.LayoutMarginsGuide.LeadingAnchor, trailing: View.LayoutMarginsGuide.TrailingAnchor,
-            top: containerView.TopAnchor, bottom: containerView.BottomAnchor );
-      }
-
-      private void SetupActionButton( )
-      {
-         actionButton = new UIButton( UIButtonType.System );
-         actionButton.SetImage( Images.ChevronRight, UIControlState.Normal );
-         actionButton.ImageView.ContentMode = UIViewContentMode.ScaleAspectFit;
-         actionButton.ImageView.WithSquareSize( 20 );
-         actionButton.TintColor = Colors.OuterSpace;
-         actionButton.BackgroundColor = Colors.White;
-         actionButton.WithSquareSize( 50 );
-         actionButton.WithCornerRadius( 25 );
-         actionButton.WithShadow( opacity: 0.5f, radius: 2, color: Colors.White );
-         actionButton.Alpha = 0;
-         actionButton.TouchUpInside += HandleActionButtonTouchUpInside;
-
-         View.AddSubview( actionButton );
-
-         actionButton.Anchor( bottom: View.LayoutMarginsGuide.BottomAnchor, trailing: View.LayoutMarginsGuide.TrailingAnchor,
-            padding: new UIEdgeInsets( 0, 0, 14, 0 ) );
-      }
-
-      private void HandleDefaultZonesButtonTouchUpInside( object sender, EventArgs e )
-      {
-         DismissPopUp( completionHandler: ( ) => {
-            viewModel.UseDefaultZonesSelected( );
-         } );
-      }
-
-      private void HandleActionButtonTouchUpInside( object sender, EventArgs e )
-      {
-         DismissPopUp( completionHandler: ( ) => {
-            viewModel.ActionSelected( );
-         } );
-      } 
-
-      private void PresentPopUp( )
-      {
-         UIView.AnimateNotify( duration: 0.4, delay: 0, options: UIViewAnimationOptions.CurveEaseOut, animation: ( ) => {
-
-            View.BackgroundColor = Colors.Black.ColorWithAlpha( 0.2f );
-            containerAnchoredConstraints.Bottom.Constant = 0;
-            actionButton.Alpha = 1;
-
-            View.LayoutIfNeeded( );
-
-         }, completion: finished => {
-
-            statusCheckBox.SetOn( true, animated: true );
-
-         } );
-      }
-
-      private void DismissPopUp( Action completionHandler )
-      {
-         UIView.AnimateNotify( duration: 0.4, delay: 0, options: UIViewAnimationOptions.CurveEaseOut, animation: ( ) => {
-
-            View.BackgroundColor = Colors.Clear;
-            containerAnchoredConstraints.Bottom.Constant = containerViewHeight;
-            actionButton.Alpha = 0 ;
-
-            View.LayoutIfNeeded( );
-
-         }, completion: ( bool finished ) => {
-
-            DismissViewController( animated: false, completionHandler: completionHandler );
-
          } );
       }
    }

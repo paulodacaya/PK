@@ -26,12 +26,13 @@ namespace PK.iOS
 
          if( PKRealm.DeviceIsCalibrated( ) )
          {
-            // TODO Navigate to home screen
+            // Navgiate to Home Screen
+            Window.RootViewController = new LightNavigationController( rootViewController: new HomeController( ) );
          }
          else
          {
             // Navigate to Calibration OnBoarding
-            Window.RootViewController = new RootNavigationController( rootViewController: new HomeController( ) );
+            Window.RootViewController = new LightNavigationController( rootViewController: new HomeController( ) );
          }
 
          ApplyGlobalStyling( );
@@ -41,18 +42,7 @@ namespace PK.iOS
 
       private void ApplyGlobalStyling( )
       {
-         UINavigationBar.Appearance.SetBackgroundImage( backgroundImage: new UIImage( ), barMetrics: UIBarMetrics.Default );
-         UINavigationBar.Appearance.ShadowImage = new UIImage( );
-         UINavigationBar.Appearance.Translucent = true;
-         UINavigationBar.Appearance.BackgroundColor = Colors.Clear;
-         UINavigationBar.Appearance.SetTitleTextAttributes( new UITextAttributes {
-            Font = Fonts.Bold.WithSize( 21f ),
-            TextColor = Colors.White,
-         } );
-
-         UITableView.Appearance.BackgroundColor = Colors.Clear;
-
-         UITableViewCell.Appearance.BackgroundColor = Colors.Clear;
+         UINavigationBar.Appearance.SetBackgroundImage( Images.BoschSuperGraphic, UIBarMetrics.Default );
       }
 
       public override void OnResignActivation( UIApplication application )

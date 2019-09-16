@@ -152,7 +152,6 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
-    <Compile Include="Helpers\Animations.cs" />
     <Compile Include="Helpers\Values.cs" />
     <Compile Include="Helpers\Components.cs" />
     <Compile Include="Helpers\Fonts.cs" />
@@ -160,21 +159,15 @@
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Helpers\Images.cs" />
     <Compile Include="Bluetooth\iOSBluetoothLE.cs" />
-    <Compile Include="Views\ListItemCell.cs" />
-    <Compile Include="Views\HomeSectionItemView.cs" />
-    <Compile Include="Views\ZoneCell.cs" />
-    <Compile Include="Controllers\RootNavigationController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\Settings\SettingController.cs" />
     <Compile Include="Controllers\Calibration\CameraCalibrationController.cs" />
-    <Compile Include="Controllers\Calibration\Zoning\ZoneSelectionController.cs" />
-    <Compile Include="Controllers\Calibration\Zoning\ConfigureZonesController.cs" />
-    <Compile Include="Controllers\Modals\DialogController.cs" />
     <Compile Include="Controllers\Modals\BaseModalController.cs" />
     <Compile Include="Controllers\Modals\SnackBarController.cs" />
     <Compile Include="Helpers\OrienationHelper.cs" />
     <Compile Include="Helpers\ARCameraHelper.cs" />
     <Compile Include="Controllers\Calibration\CalibrateOnBoardingController.cs" />
+    <Compile Include="Controllers\ConfigureZonesController.cs" />
+    <Compile Include="Controllers\LightNavigationController.cs" />
   </ItemGroup>
   <ItemGroup>
     <ImageAsset Include="Assets.xcassets\.DS_Store" />
@@ -197,18 +190,10 @@
     <ImageAsset Include="Assets.xcassets\CellPhoneWireless.imageset\CellPhoneWireless64.png" />
     <ImageAsset Include="Assets.xcassets\CellPhoneWireless.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\CellPhoneWireless.imageset\CellPhoneWireless256.png" />
-    <ImageAsset Include="Assets.xcassets\IsometricMaleBackwards.imageset\IsometricMaleBackwards256.png" />
-    <ImageAsset Include="Assets.xcassets\IsometricMaleBackwards.imageset\IsometricMaleBackwards512.png" />
-    <ImageAsset Include="Assets.xcassets\IsometricMaleBackwards.imageset\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\IsometricMaleBackwards.imageset\IsometricMaleBackwards1024.png" />
     <ImageAsset Include="Assets.xcassets\FlashlightOff.imageset\FlashlightOff128.png" />
     <ImageAsset Include="Assets.xcassets\FlashlightOff.imageset\FlashlightOff64.png" />
     <ImageAsset Include="Assets.xcassets\FlashlightOff.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\FlashlightOff.imageset\FlashlightOff256.png" />
-    <ImageAsset Include="Assets.xcassets\ShoePrint.imageset\ShoePrint64.png" />
-    <ImageAsset Include="Assets.xcassets\ShoePrint.imageset\ShoePrint256.png" />
-    <ImageAsset Include="Assets.xcassets\ShoePrint.imageset\ShoePrint128.png" />
-    <ImageAsset Include="Assets.xcassets\ShoePrint.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\CarZoneBoot.imageset\CarZoneBoot128.png" />
     <ImageAsset Include="Assets.xcassets\CarZoneBoot.imageset\CarZoneBoot64.png" />
     <ImageAsset Include="Assets.xcassets\CarZoneBoot.imageset\Contents.json" />
@@ -217,14 +202,6 @@
     <ImageAsset Include="Assets.xcassets\PadlockUnlock.imageset\PadlockUnlock64.png" />
     <ImageAsset Include="Assets.xcassets\PadlockUnlock.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\PadlockUnlock.imageset\PadlockUnlock128.png" />
-    <ImageAsset Include="Assets.xcassets\ShoppingBag.imageset\ShoppingBag128.png" />
-    <ImageAsset Include="Assets.xcassets\ShoppingBag.imageset\ShoppingBag64.png" />
-    <ImageAsset Include="Assets.xcassets\ShoppingBag.imageset\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\ShoppingBag.imageset\ShoppingBag256.png" />
-    <ImageAsset Include="Assets.xcassets\AugmentedReality.imageset\AugmentedReality256.png" />
-    <ImageAsset Include="Assets.xcassets\AugmentedReality.imageset\AugmentedReality64.png" />
-    <ImageAsset Include="Assets.xcassets\AugmentedReality.imageset\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\AugmentedReality.imageset\AugmentedReality128.png" />
     <ImageAsset Include="Assets.xcassets\Account.imageset\Account256.png" />
     <ImageAsset Include="Assets.xcassets\Account.imageset\Account128.png" />
     <ImageAsset Include="Assets.xcassets\Account.imageset\Account64.png" />
@@ -254,16 +231,7 @@
     <ImageAsset Include="Assets.xcassets\InformationOutline.imageset\InformationOutline64.png" />
     <ImageAsset Include="Assets.xcassets\InformationOutline.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\InformationOutline.imageset\InformationOutline256.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\PerfectlyKeylessAppIcon120.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\PerfectlyKeylessAppIcon58.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\PerfectlyKeylessAppIcon180.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\PerfectlyKeylessAppIcon120-1.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\PerfectlyKeylessAppIcon60.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\PerfectlyKeylessAppIcon87.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\PerfectlyKeylessAppIcon80.png" />
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\PerfectlyKeylessAppIcon40.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\PerfectlyKeylessAppIcon1024.png" />
     <ImageAsset Include="Assets.xcassets\Mazda3AngleView.imageset\Mazda3SideView.png" />
     <ImageAsset Include="Assets.xcassets\Mazda3AngleView.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\CarZonePassenger.imageset\CarZonePassenger128.png" />
@@ -274,22 +242,10 @@
     <ImageAsset Include="Assets.xcassets\AlertCircleOutline.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\AlertCircleOutline.imageset\AlertCircleOutline256.png" />
     <ImageAsset Include="Assets.xcassets\AlertCircleOutline.imageset\AlertCircleOutline64.png" />
-    <ImageAsset Include="Assets.xcassets\Steering.imageset\Steering256.png" />
-    <ImageAsset Include="Assets.xcassets\Steering.imageset\Steering128.png" />
-    <ImageAsset Include="Assets.xcassets\Steering.imageset\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\Steering.imageset\Steering64.png" />
-    <ImageAsset Include="Assets.xcassets\Man.imageset\Man128.png" />
-    <ImageAsset Include="Assets.xcassets\Man.imageset\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\Man.imageset\Man64.png" />
-    <ImageAsset Include="Assets.xcassets\Man.imageset\Man256.png" />
     <ImageAsset Include="Assets.xcassets\ChevronRight.imageset\ChevronRight64.png" />
     <ImageAsset Include="Assets.xcassets\ChevronRight.imageset\ChevronRight128.png" />
     <ImageAsset Include="Assets.xcassets\ChevronRight.imageset\ChevronRight256.png" />
     <ImageAsset Include="Assets.xcassets\ChevronRight.imageset\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\FingerprintAR.imageset\FingerprintAR256.png" />
-    <ImageAsset Include="Assets.xcassets\FingerprintAR.imageset\FingerprintAR512.png" />
-    <ImageAsset Include="Assets.xcassets\FingerprintAR.imageset\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\FingerprintAR.imageset\FingerprintAR1024.png" />
     <ImageAsset Include="Assets.xcassets\ArrowUp.imageset\ArrowUp128.png" />
     <ImageAsset Include="Assets.xcassets\ArrowUp.imageset\ArrowUp64.png" />
     <ImageAsset Include="Assets.xcassets\ArrowUp.imageset\Contents.json" />
@@ -319,10 +275,6 @@
     <ImageAsset Include="Assets.xcassets\ChevronLeft.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\ChevronLeft.imageset\ChevronLeft64.png" />
     <ImageAsset Include="Assets.xcassets\ChevronLeft.imageset\ChevronLeft256.png" />
-    <ImageAsset Include="Assets.xcassets\Pants.imageset\Pants256.png" />
-    <ImageAsset Include="Assets.xcassets\Pants.imageset\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\Pants.imageset\Pants128.png" />
-    <ImageAsset Include="Assets.xcassets\Pants.imageset\Pants64.png" />
     <ImageAsset Include="Assets.xcassets\CarZoneDriver.imageset\CarZoneDriver256.png" />
     <ImageAsset Include="Assets.xcassets\CarZoneDriver.imageset\CarZoneDriver128.png" />
     <ImageAsset Include="Assets.xcassets\CarZoneDriver.imageset\Contents.json" />
@@ -335,19 +287,8 @@
     <ImageAsset Include="Assets.xcassets\CarZoneWelcome.imageset\CarZoneWelcome64.png" />
     <ImageAsset Include="Assets.xcassets\CarZoneWelcome.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\CarZoneWelcome.imageset\CarZoneWelcome256.png" />
-    <ImageAsset Include="Assets.xcassets\LaunchImage.launchimage\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\FingerPrintAR.arreferenceimage\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\FingerPrintAR.arreferenceimage\ThumbPrintAR.png" />    
     <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\PlantAR.arreferenceimage\Contents.json" />
     <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\PlantAR.arreferenceimage\plant_credit_card_size_AR.png" />
-    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRect1AR.arreferenceimage\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRect1AR.arreferenceimage\door_button1_rect_AR.png" />
-    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRound1AR.arreferenceimage\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRound1AR.arreferenceimage\door_button1_rounded_AR.png" />
-    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRect2AR.arreferenceimage\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRect2AR.arreferenceimage\door_button2_rect_AR.png" />
-    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRound2AR.arreferenceimage\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRound2AR.arreferenceimage\door_button2_rounded_AR.png" />
     <ImageAsset Include="Assets.xcassets\CircleSlice.imageset\CircleSlice128.png" />
     <ImageAsset Include="Assets.xcassets\CircleSlice.imageset\CircleSlice256.png" />
     <ImageAsset Include="Assets.xcassets\CircleSlice.imageset\CircleSlice64.png" />
@@ -359,6 +300,43 @@
     <ImageAsset Include="Assets.xcassets\CardBulletedOutline.imageset\CardBulletedOutline256.png" />
     <ImageAsset Include="Assets.xcassets\CardBulletedOutline.imageset\CardBulletedOutline64.png" />
     <ImageAsset Include="Assets.xcassets\CardBulletedOutline.imageset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\BoschIcon.imageset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\MessageText.imageset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\MessageText.imageset\MessageText128.png" />
+    <ImageAsset Include="Assets.xcassets\MessageText.imageset\MessageText256.png" />
+    <ImageAsset Include="Assets.xcassets\MessageText.imageset\MessageText64.png" />
+    <ImageAsset Include="Assets.xcassets\BoschSuperGraphic.imageset\BoschSuperGraphic.png" />
+    <ImageAsset Include="Assets.xcassets\BoschSuperGraphic.imageset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\PK1.imageset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\PK1.imageset\pk_1_1024.png" />
+    <ImageAsset Include="Assets.xcassets\PK1.imageset\pk_1_256.png" />
+    <ImageAsset Include="Assets.xcassets\PK1.imageset\pk_1_512.png" />
+    <ImageAsset Include="Assets.xcassets\PK2.imageset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\PK3.imageset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\PK3.imageset\pk_3_1024.png" />
+    <ImageAsset Include="Assets.xcassets\PK3.imageset\pk_3_256.png" />
+    <ImageAsset Include="Assets.xcassets\PK3.imageset\pk_3_512.png" />
+    <ImageAsset Include="Assets.xcassets\BoschIcon.imageset\BoschIcon64-1.png" />
+    <ImageAsset Include="Assets.xcassets\BoschIcon.imageset\BoschIcon128-1.png" />
+    <ImageAsset Include="Assets.xcassets\BoschIcon.imageset\BoschIcon256-1.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\app_icon_40.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\app_icon_60.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\app_icon_58.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\app_icon_87.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\app_icon_80.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\app_icon_120.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\app_icon_120-1.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\app_icon_180.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\app_icon_1024.png" />
+    <ImageAsset Include="Assets.xcassets\PK2.imageset\pk_6_256.png" />
+    <ImageAsset Include="Assets.xcassets\PK2.imageset\pk_6_512.png" />
+    <ImageAsset Include="Assets.xcassets\PK2.imageset\pk_6_1024.png" />
+    <ImageAsset Include="Assets.xcassets\PKLaunchScreen.imageset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\PKLaunchScreen.imageset\pk_lauchscreen_image_1024.png" />
+    <ImageAsset Include="Assets.xcassets\PKLaunchScreen.imageset\pk_lauchscreen_image_2048.png" />
+    <ImageAsset Include="Assets.xcassets\PKLaunchScreen.imageset\pk_lauchscreen_image_512.png" />
+    <ImageAsset Include="Assets.xcassets\BoschSuperGraphicBackground.imageset\BoschSuperGraphicBackground.jpg" />
+    <ImageAsset Include="Assets.xcassets\BoschSuperGraphicBackground.imageset\Contents.json" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\Fonts\BrixSansMedium.otf">
@@ -373,9 +351,12 @@
     <BundleResource Include="Resources\Fonts\BrixSansRegular.otf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </BundleResource>
-  </ItemGroup>
-  <ItemGroup>
-    <InterfaceDefinition Include="LaunchScreen.storyboard" />
+    <BundleResource Include="Resources\Fonts\BoschSans-Bold.otf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </BundleResource>
+    <BundleResource Include="Resources\Fonts\BoschSans-Light.otf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </BundleResource>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assets.xcassets\AR Resources.arresourcegroup\FingerPrintAR.arreferenceimage\" />
@@ -387,6 +368,18 @@
     <Folder Include="Assets.xcassets\AR Resources.arresourcegroup\DoorHandleRound2AR.arreferenceimage\" />
     <Folder Include="Assets.xcassets\CircleSlice.imageset\" />
     <Folder Include="Assets.xcassets\CardBulletedOutline.imageset\" />
+    <Folder Include="Assets.xcassets\BoschIcon.imageset\" />
+    <Folder Include="Assets.xcassets\MessageText.imageset\" />
+    <Folder Include="Assets.xcassets\BoschSuperGraphic.imageset\" />
+    <Folder Include="Assets.xcassets\PK1.imageset\" />
+    <Folder Include="Assets.xcassets\PK2.imageset\" />
+    <Folder Include="Assets.xcassets\PK3.imageset\" />
+    <Folder Include="Views\" />
+    <Folder Include="Assets.xcassets\PKLaunchScreen.imageset\" />
+    <Folder Include="Assets.xcassets\BoschSuperGraphicBackground.imageset\" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterfaceDefinition Include="LaunchScreen.storyboard" />
   </ItemGroup>
   <Import Project="..\PK\PK.projitems" Label="Shared" Condition="Exists('..\PK\PK.projitems')" />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />

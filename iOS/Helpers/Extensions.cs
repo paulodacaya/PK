@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using CoreAnimation;
 using CoreGraphics;
 using Foundation;
@@ -7,28 +6,6 @@ using UIKit;
 
 namespace PK.iOS.Helpers
 {
-   /// <summary>
-   /// UILabel
-   /// </summary>
-   public static class Labels
-   {
-      public static void SetAttributedLineSpaceText( this UILabel label, string text, UIColor textColor, UIFont textFont, nfloat lineSpacing, UITextAlignment textAlignment = UITextAlignment.Left )
-      {
-         var attributedString = new UIStringAttributes {
-            Font = textFont,
-            ForegroundColor = textColor,
-            ParagraphStyle = new NSMutableParagraphStyle { LineSpacing = lineSpacing }
-         };
-
-         var attributedText = new NSMutableAttributedString( text );
-         attributedText.AddAttributes( attributedString, new NSRange( 0, text.Length ) );
-
-         label.AttributedText = attributedText;
-         label.Lines = 0;
-         label.TextAlignment = textAlignment;
-      }
-   }
-
    /// <summary>
    /// UIView+NSLayoutConstraint
    /// </summary>
@@ -241,6 +218,18 @@ namespace PK.iOS.Helpers
          return view;
       }
 
+      // Custom radius for selected corners
+      public static void CornerRadius( this UIView view, UIRectCorner corners, nfloat radius )
+      {
+         var path = UIBezierPath.FromRoundedRect( view.Bounds, corners, new CGSize( radius, radius ) );
+
+         var maskLayer = new CAShapeLayer {
+            Path = path.CGPath
+         };
+
+         view.Layer.Mask = maskLayer;
+      }
+
       public static UIView WithBorder( this UIView view, nfloat width, UIColor color )
       {
          view.Layer.BorderWidth = width;
@@ -258,19 +247,11 @@ namespace PK.iOS.Helpers
 
          return view;
       }
-
-      public static void CornerRadius( this UIView view, UIRectCorner corners, nfloat radius )
-      {
-         var path = UIBezierPath.FromRoundedRect( view.Bounds, corners, new CGSize( radius, radius ) );
-
-         var maskLayer = new CAShapeLayer {
-            Path = path.CGPath
-         };
-
-         view.Layer.Mask = maskLayer;
-      }
    }
 
+   /// <summary>
+   /// UIEdgeInsets
+   /// </summary>
    public static class EdgeInsets
    {
       public static UIEdgeInsets AllSides( this UIEdgeInsets edgeInsets, nfloat side )
@@ -279,11 +260,25 @@ namespace PK.iOS.Helpers
       }
    }
 
-   public static class ToolBars
+   /// <summary>
+   /// UILabel
+   /// </summary>
+   public static class Labels
    {
-      public static void AddItem( this UIToolbar toolbar, params UIBarButtonItem[ ] items )
+      public static void SetAttributedLineSpaceText( this UILabel label, string text, UIColor textColor, UIFont textFont, nfloat lineSpacing, UITextAlignment textAlignment = UITextAlignment.Left )
       {
-         toolbar.SetItems( toolbar.Items.Concat( items ).ToArray( ), animated: true );
+         var attributedString = new UIStringAttributes {
+            Font = textFont,
+            ForegroundColor = textColor,
+            ParagraphStyle = new NSMutableParagraphStyle { LineSpacing = lineSpacing }
+         };
+
+         var attributedText = new NSMutableAttributedString( text );
+         attributedText.AddAttributes( attributedString, new NSRange( 0, text.Length ) );
+
+         label.AttributedText = attributedText;
+         label.Lines = 0;
+         label.TextAlignment = textAlignment;
       }
    }
 }

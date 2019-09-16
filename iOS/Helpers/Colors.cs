@@ -19,20 +19,12 @@ namespace PK.iOS.Helpers
       // action items - text, action icons
       public static UIColor InnerSpace = UIColor.FromRGB( 93, 93, 97 );
 
-
-
-
-
-
-
-
-      public static UIColor AuroMetalSaurus => UIColor.FromRGB( 115, 122, 128 );
-      public static UIColor QuickSilver => UIColor.FromRGB( 157, 165, 168 );
-      public static UIColor Platinum => UIColor.FromRGB( 223, 226, 228 );      
-      
-      public static UIColor DarkGray => UIColor.FromRGB( 187, 187, 187 );
       public static UIColor WhiteWithTransparancy => White.ColorWithAlpha( 0.2f );
       public static UIColor Clear => UIColor.Clear;
+
+      public static UIColor BoschBlue => UIColor.FromRGB( 0, 86, 145 );
+      public static UIColor BoschBlack => UIColor.Black;
+      public static UIColor BoschGray => UIColor.FromRGB( 122, 133, 144 );
 
       public static UIColor BoschLightGreen => UIColor.FromRGB( 99, 160, 103 );
       public static UIColor BoschDarkGreen => UIColor.FromRGB( 30, 144, 72 );

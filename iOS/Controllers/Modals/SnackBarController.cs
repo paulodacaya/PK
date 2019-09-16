@@ -74,7 +74,7 @@ namespace PK.iOS.Controllers
       }
 
       // UI Elements
-      private CustomUIImageView iconImageView;
+      private UIImageView iconImageView;
       private UILabel messageLabel;
       private UIButton actionButton;
 
@@ -103,16 +103,13 @@ namespace PK.iOS.Controllers
          containerView.Layer.ShadowOffset = new CGSize( 0, 2 );
          containerView.Layer.ShadowOpacity = 0.6f;
 
-         iconImageView = new CustomUIImageView( new CGSize( 26, 26 ) ) {
-            Image = iconImage,
-            TintColor = iconTintColor,
-            Hidden = iconImage == null,
-         };
+         iconImageView = Components.UIImageView( iconImage, iconTintColor );
+         iconImageView.Hidden = iconImage == null;
 
          messageLabel = new UILabel {
             Text = messageText,
             Font = Fonts.Medium.WithSize( 14f ),
-            TextColor = Colors.AuroMetalSaurus,
+            TextColor = Colors.BoschBlue,
             Lines = 0,
             Hidden = string.IsNullOrEmpty( messageText )
          };
@@ -129,10 +126,10 @@ namespace PK.iOS.Controllers
          actionButton.TouchUpInside += ActionButtonTouchUpInside;
 
          var stackView = HStack(
-            iconImageView,
+            iconImageView.WithSquareSize( 26 ),
             messageLabel,
             actionButton
-         ).With( spacing: 12, distribution: UIStackViewDistribution.FillProportionally ).WithPadding( new UIEdgeInsets( 10, 12, 10, 12 ) );
+         ).With( spacing: 12, alignment: UIStackViewAlignment.Center ).WithPadding( new UIEdgeInsets( 10, 12, 10, 12 ) );
 
          View.AddSubview( containerView );
 

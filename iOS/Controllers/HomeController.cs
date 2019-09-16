@@ -2,27 +2,28 @@
 using CoreGraphics;
 using Foundation;
 using PK.iOS.Helpers;
-using PK.iOS.Views;
 using PK.ViewModels;
 using UIKit;
+using static PK.iOS.Helpers.Stacks;
 
 namespace PK.iOS.Controllers
 {
    public class HomeController : UITableViewController, IHomeViewModel
    {
       private readonly HomeViewModel viewModel;
-      private readonly string cellId = "homeListCellId";
 
-      public HomeController( ) : base( withStyle: UITableViewStyle.Grouped )
+      // UI Elements
+
+      public override UIStatusBarStyle PreferredStatusBarStyle( ) => UIStatusBarStyle.LightContent;
+
+      public HomeController( )
       {
-         viewModel = new HomeViewModel( viewModel: this );
+         viewModel = new HomeViewModel( this );
       }
 
       public override void ViewDidLoad( )
       {
          base.ViewDidLoad( );
-
-         ( ( RootNavigationController )NavigationController ).OverrideTransitionDelegate( );
 
          SetupNavigation( );
          SetupTableView( );
@@ -30,63 +31,125 @@ namespace PK.iOS.Controllers
 
       private void SetupNavigation( )
       {
-         NavigationItem.Title = viewModel.Title;
-
-         var settingButton = new UIButton {
-            TintColor = Colors.White,
-         };
-         settingButton.SetBackgroundImage( Images.Setting, UIControlState.Normal );
-         settingButton.TouchUpInside += HandleSettingButtonTouchUpInside;
-         settingButton.Anchor( size: new CGSize( 20, 20 ) );
-
-         NavigationItem.LeftBarButtonItem = new UIBarButtonItem( customView: settingButton );
+         NavigationItem.SetHidesBackButton( true, animated: false );
       }
 
       private void SetupTableView( )
       {
-         TableView.RowHeight = 62;
-         TableView.SectionHeaderHeight = 120;
-         TableView.ShowsVerticalScrollIndicator = false;
+         TableView.BackgroundView = Components.UIImageView( Images.BoschSuperGraphicBackground, null, UIViewContentMode.ScaleAspectFill );
          TableView.SeparatorStyle = UITableViewCellSeparatorStyle.None;
-         TableView.ContentInset = new UIEdgeInsets( View.Frame.Height * 0.33f, 0, 0, 0 );
-
-         TableView.RegisterClassForCellReuse( typeof( ListItemCell ), cellId );
+         TableView.RegisterClassForCellReuse( typeof( CardCell ), CardCell.CellId );
       }
 
-      public override nint NumberOfSections( UITableView tableView ) => 1;
+      public override nint NumberOfSections( UITableView tableView ) => 2;
 
-      public override UIView GetViewForHeader( UITableView tableView, nint section ) => new HomeSectionItemView( );
+      public override UIView GetViewForHeader( UITableView tableView, nint section )
+      {
+         if( section == 0 )
+         {
+            var greetingLabel = Components.UILabel( "Good afternoon", Colors.BoschBlue, Fonts.BoschBold.WithSize( 26 ) );
+            var vehicleInfolabel = Components.UILabel( "Current Vehicle: Mazda 3 (ABE 674)", Colors.BoschBlue, Fonts.BoschLight.WithSize( 15 ) );
+            var vehicleStateLabel = Components.UILabel( "State: Locked", Colors.BoschBlue, Fonts.BoschLight.WithSize( 15 ) );
+            var vehicleStateImageView = Components.UIImageView( Images.PadlockLock, Colors.BoschBlue );
 
-      public override nint RowsInSection( UITableView tableView, nint section ) => viewModel.ListItems.Count;
+            var stackView = VStack(
+               greetingLabel,
+               vehicleInfolabel,
+               HStack(
+                  vehicleStateLabel,
+                  vehicleStateImageView.WithSquareSize( 12 ),
+                  new UIView( )
+               ),
+               new UIView( )
+            ).With( spacing: 6 ).WithPadding( new UIEdgeInsets( 24, 12, 34, 12 ) );
+            stackView.SetCustomSpacing( 12, greetingLabel );
+
+            var containerView = new UIView {
+               PreservesSuperviewLayoutMargins = true
+            };
+
+            containerView.AddSubview( stackView );
+
+            stackView.Anchor( leading: containerView.LayoutMarginsGuide.LeadingAnchor, top: containerView.TopAnchor,
+               trailing: containerView.LayoutMarginsGuide.TrailingAnchor, bottom: containerView.BottomAnchor );
+
+            return containerView;
+         }
+
+         return new UIView( );
+      }
+
+      public override nfloat GetHeightForHeader( UITableView tableView, nint section )
+      {
+         if( section == 0 )
+            return UITableView.AutomaticDimension;
+
+         return 12;
+      }
+
+      public override nint RowsInSection( UITableView tableView, nint section ) => 1;
 
       public override UITableViewCell GetCell( UITableView tableView, NSIndexPath indexPath )
       {
-         var cell = tableView.DequeueReusableCell( cellId, indexPath ) as ListItemCell;
-         cell.ListItemViewModel = viewModel.ListItems[ indexPath.Row ];
-
+         var cell = tableView.DequeueReusableCell( CardCell.CellId, indexPath ) as CardCell;
          return cell;
       }
+   }
 
-      public override void RowSelected( UITableView tableView, NSIndexPath indexPath )
+   public class CardCell : UITableViewCell
+   {
+      public const string CellId = "CardCellId";
+
+      private UIView cardContainer;
+
+      public CardCell( IntPtr handler ) : base( handler )
       {
-         viewModel.ListItems[ indexPath.Row ].Selected( );
-         tableView.DeselectRow( indexPath, animated: false );
+         PreservesSuperviewLayoutMargins = true;
+         BackgroundColor = Colors.Clear;
+
+         ContentView.PreservesSuperviewLayoutMargins = true;
+         ContentView.BackgroundColor = Colors.Clear;
+
+         cardContainer = new UIView { BackgroundColor = Colors.White };
+         cardContainer.WithShadow( 0.2f, offset: new CGSize( 0, 4 ), radius: 4, color: Colors.BoschBlack );
+         cardContainer.WithCornerRadius( Values.CornerRadius );
+
+         var titleLabel = Components.UILabel( "Re-calibrate your device", Colors.BoschBlue, Fonts.BoschBold.WithSize( 18 ) );
+         var iconImageView = Components.UIImageView( Images.Restart, Colors.BoschBlue );
+         var messageLabel = Components.UILabel( "A simple AR (Augmeneted Reality) calibration experience to ensure your mobiles proximity is accurate with your vehicle.", Colors.BoschBlack, Fonts.BoschLight.WithSize( 15 ) );
+
+         var stackView = VStack(
+            HStack(
+               titleLabel,
+               iconImageView.WithSquareSize( 20 )
+            ),
+            messageLabel
+         ).With( spacing: 12 ).WithPadding( new UIEdgeInsets( 24, 16, 24, 16 ) );
+
+         ContentView.AddSubview( cardContainer );
+
+         cardContainer.Anchor( leading: ContentView.LayoutMarginsGuide.LeadingAnchor, top: ContentView.TopAnchor,
+            trailing: ContentView.LayoutMarginsGuide.TrailingAnchor, bottom: ContentView.BottomAnchor );
+
+         cardContainer.AddSubview( stackView );
+
+         stackView.FillSuperview( );
       }
 
-      #region IZoningViewModel
-      void IHomeViewModel.NotifyLockChanged( )
+      public override void SetHighlighted( bool highlighted, bool animated )
       {
+         AnimateNotify( duration: 0.2f, delay: 0, options: UIViewAnimationOptions.CurveEaseOut, animation: ( ) => {
+            if( highlighted )
+            {
+               cardContainer.Transform = CGAffineTransform.MakeScale( sx: 0.98f, sy: 0.98f );
+            }
+            else
+            {
+               cardContainer.Transform = CGAffineTransform.MakeIdentity( );
+            }
+         }, completion: null );
       }
-      #endregion
 
-      #region Event Handlers
-      private void HandleSettingButtonTouchUpInside( object sender, EventArgs e )
-      {
-         ( NavigationController as RootNavigationController ).ReverseTransitioning = true;
-
-         var vc = new SettingController( );
-         NavigationController.PushViewController( viewController: vc, animated: true );
-      }
-      #endregion
+      public override void SetSelected( bool selected, bool animated ) { /* PREVENT DEFAULT BEHAVOIR */ }
    }
 }

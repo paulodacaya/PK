@@ -44,5 +44,12 @@ namespace PK.iOS.Helpers
       public static UIImage FlashlightOff => UIImage.FromBundle( "FlashlightOff" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
       public static UIImage CircleSlice => UIImage.FromBundle( "CircleSlice" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
       public static UIImage CardBulletedOutline => UIImage.FromBundle( "CardBulletedOutline" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
+      public static UIImage BoschIcon => UIImage.FromBundle( "BoschIcon" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysOriginal );
+      public static UIImage MessageText => UIImage.FromBundle( "MessageText" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
+      public static UIImage BoschSuperGraphic => UIImage.FromBundle( "BoschSuperGraphic" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysOriginal );
+      public static UIImage BoschSuperGraphicBackground => UIImage.FromBundle( "BoschSuperGraphicBackground" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysOriginal );
+      public static UIImage PK1 => UIImage.FromBundle( "PK1" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
+      public static UIImage PK2 => UIImage.FromBundle( "PK2" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
+      public static UIImage PK3 => UIImage.FromBundle( "PK3" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
    }
 }
