@@ -1,18 +1,16 @@
 ﻿using System;
-using CoreGraphics;
+using System.Linq;
 using Foundation;
 using PK.iOS.Helpers;
+using PK.iOS.Views;
 using PK.ViewModels;
 using UIKit;
-using static PK.iOS.Helpers.Stacks;
 
 namespace PK.iOS.Controllers
 {
    public class HomeController : UITableViewController, IHomeViewModel
    {
       private readonly HomeViewModel viewModel;
-
-      // UI Elements
 
       public override UIStatusBarStyle PreferredStatusBarStyle( ) => UIStatusBarStyle.LightContent;
 
@@ -39,41 +37,22 @@ namespace PK.iOS.Controllers
          TableView.BackgroundView = Components.UIImageView( Images.BoschSuperGraphicBackground, null, UIViewContentMode.ScaleAspectFill );
          TableView.SeparatorStyle = UITableViewCellSeparatorStyle.None;
          TableView.RegisterClassForCellReuse( typeof( CardCell ), CardCell.CellId );
+         TableView.RegisterClassForCellReuse( typeof( ExpandableCardCell ), ExpandableCardCell.CellId );
       }
 
-      public override nint NumberOfSections( UITableView tableView ) => 2;
+      public override nint NumberOfSections( UITableView tableView ) => viewModel.CardItemViewModels.Count;
 
       public override UIView GetViewForHeader( UITableView tableView, nint section )
       {
          if( section == 0 )
          {
-            var greetingLabel = Components.UILabel( "Good afternoon", Colors.BoschBlue, Fonts.BoschBold.WithSize( 26 ) );
-            var vehicleInfolabel = Components.UILabel( "Current Vehicle: Mazda 3 (ABE 674)", Colors.BoschBlue, Fonts.BoschLight.WithSize( 15 ) );
-            var vehicleStateLabel = Components.UILabel( "State: Locked", Colors.BoschBlue, Fonts.BoschLight.WithSize( 15 ) );
-            var vehicleStateImageView = Components.UIImageView( Images.PadlockLock, Colors.BoschBlue );
+            var homeHeaderView = new HomeHeaderView( );
+            homeHeaderView.GreetingLabel.Text = viewModel.GreetingMessage;
+            homeHeaderView.VehicleInfoLabel.Text = viewModel.VehicleMessage;
+            homeHeaderView.VehicleStateLabel.Text = "State: Locked";
+            homeHeaderView.VehicleStateImageView.Image = Images.PadlockLock;
 
-            var stackView = VStack(
-               greetingLabel,
-               vehicleInfolabel,
-               HStack(
-                  vehicleStateLabel,
-                  vehicleStateImageView.WithSquareSize( 12 ),
-                  new UIView( )
-               ),
-               new UIView( )
-            ).With( spacing: 6 ).WithPadding( new UIEdgeInsets( 24, 12, 34, 12 ) );
-            stackView.SetCustomSpacing( 12, greetingLabel );
-
-            var containerView = new UIView {
-               PreservesSuperviewLayoutMargins = true
-            };
-
-            containerView.AddSubview( stackView );
-
-            stackView.Anchor( leading: containerView.LayoutMarginsGuide.LeadingAnchor, top: containerView.TopAnchor,
-               trailing: containerView.LayoutMarginsGuide.TrailingAnchor, bottom: containerView.BottomAnchor );
-
-            return containerView;
+            return homeHeaderView;
          }
 
          return new UIView( );
@@ -91,65 +70,73 @@ namespace PK.iOS.Controllers
 
       public override UITableViewCell GetCell( UITableView tableView, NSIndexPath indexPath )
       {
-         var cell = tableView.DequeueReusableCell( CardCell.CellId, indexPath ) as CardCell;
-         return cell;
+         var cardItemViewModel = viewModel.CardItemViewModels[ indexPath.Section ];
+
+         IBindViewModel<CardItemViewModel> cell;
+
+         if( cardItemViewModel.Type == CardItemViewModel.c_type_expandable )
+            cell = tableView.DequeueReusableCell( ExpandableCardCell.CellId, indexPath ) as IBindViewModel<CardItemViewModel>;
+         else
+            cell = tableView.DequeueReusableCell( CardCell.CellId, indexPath ) as IBindViewModel<CardItemViewModel>;
+
+         cell.SetViewModel( viewModel.CardItemViewModels[ indexPath.Section ] );
+
+         return ( UITableViewCell )cell;
+      }
+
+      public override void RowSelected( UITableView tableView, NSIndexPath indexPath )
+      {
+         var cardItemViewModel = viewModel.CardItemViewModels[ indexPath.Section ];
+         cardItemViewModel.ActionSelected( );
+      }
+
+      void IHomeViewModel.NotifyDeviceInZoneStateChanged( bool isInZone )
+      {
+         var homeHeaderView = TableView.TableHeaderView as HomeHeaderView;
+         var exapandableCell = TableView.VisibleCells.SingleOrDefault( c => c is ExpandableCardCell ) as ExpandableCardCell;
+
+         if( isInZone )
+         {
+            homeHeaderView.VehicleStateLabel.Text = "State: Unlock";
+            homeHeaderView.VehicleStateImageView.Image = Images.PadlockUnlock;
+
+            if( exapandableCell != null )
+               exapandableCell.VisualImageView.Image = Images.PK5;
+         }
+         else
+         {
+            homeHeaderView.VehicleStateLabel.Text = "State: Locked";
+            homeHeaderView.VehicleStateImageView.Image = Images.PadlockLock;
+
+            if( exapandableCell != null )
+               exapandableCell.VisualImageView.Image = Images.PK4;
+         }
+      }
+
+      void IHomeViewModel.ShowPrompt( string title, string message, string cancelText, string actionText )
+      {
+         var actionDialogController = new ActionDialogController( title, message );
+
+         actionDialogController.AddAction( cancelText, null );
+         actionDialogController.AddAction( actionText, viewModel.ActionRecalibrateSelected );
+
+         PresentViewController( actionDialogController, animated: true, completionHandler: null );
+      }
+
+      void IHomeViewModel.PresentCameraRecalibration( )
+      {
+         var cameraCalibrationController = new CameraCalibrationController( isRecalibrating: true );
+         PresentViewController( cameraCalibrationController, animated: true, completionHandler: null );
+      }
+
+      void IHomeViewModel.ReloadRowAt( int row )
+      {
+         TableView.ReloadRows( new[ ] { NSIndexPath.FromRowSection( 0, row ) }, UITableViewRowAnimation.Fade );
       }
    }
 
-   public class CardCell : UITableViewCell
+   public interface IBindViewModel<T>
    {
-      public const string CellId = "CardCellId";
-
-      private UIView cardContainer;
-
-      public CardCell( IntPtr handler ) : base( handler )
-      {
-         PreservesSuperviewLayoutMargins = true;
-         BackgroundColor = Colors.Clear;
-
-         ContentView.PreservesSuperviewLayoutMargins = true;
-         ContentView.BackgroundColor = Colors.Clear;
-
-         cardContainer = new UIView { BackgroundColor = Colors.White };
-         cardContainer.WithShadow( 0.2f, offset: new CGSize( 0, 4 ), radius: 4, color: Colors.BoschBlack );
-         cardContainer.WithCornerRadius( Values.CornerRadius );
-
-         var titleLabel = Components.UILabel( "Re-calibrate your device", Colors.BoschBlue, Fonts.BoschBold.WithSize( 18 ) );
-         var iconImageView = Components.UIImageView( Images.Restart, Colors.BoschBlue );
-         var messageLabel = Components.UILabel( "A simple AR (Augmeneted Reality) calibration experience to ensure your mobiles proximity is accurate with your vehicle.", Colors.BoschBlack, Fonts.BoschLight.WithSize( 15 ) );
-
-         var stackView = VStack(
-            HStack(
-               titleLabel,
-               iconImageView.WithSquareSize( 20 )
-            ),
-            messageLabel
-         ).With( spacing: 12 ).WithPadding( new UIEdgeInsets( 24, 16, 24, 16 ) );
-
-         ContentView.AddSubview( cardContainer );
-
-         cardContainer.Anchor( leading: ContentView.LayoutMarginsGuide.LeadingAnchor, top: ContentView.TopAnchor,
-            trailing: ContentView.LayoutMarginsGuide.TrailingAnchor, bottom: ContentView.BottomAnchor );
-
-         cardContainer.AddSubview( stackView );
-
-         stackView.FillSuperview( );
-      }
-
-      public override void SetHighlighted( bool highlighted, bool animated )
-      {
-         AnimateNotify( duration: 0.2f, delay: 0, options: UIViewAnimationOptions.CurveEaseOut, animation: ( ) => {
-            if( highlighted )
-            {
-               cardContainer.Transform = CGAffineTransform.MakeScale( sx: 0.98f, sy: 0.98f );
-            }
-            else
-            {
-               cardContainer.Transform = CGAffineTransform.MakeIdentity( );
-            }
-         }, completion: null );
-      }
-
-      public override void SetSelected( bool selected, bool animated ) { /* PREVENT DEFAULT BEHAVOIR */ }
+      void SetViewModel( T ViewModel );
    }
 }

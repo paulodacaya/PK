@@ -4,16 +4,13 @@ namespace PK.Models
 {
    public class Calibration : RealmObject
    {
+      public const string KEY_DEVICE_MODEL = nameof( DeviceModel );
+      public const string KEY_RSSI_ONE_METRE = nameof( Rssi_One_Metre );
+
       [PrimaryKey]
       public string DeviceModel { get; set; }
-      public int RSSI_0_5_m { get; set; }
-      public int RSSI_1_0_m { get; set; }
-      public int RSSI_1_5_m { get; set; }
-      public int RSSI_2_0_m { get; set; }
-      public int RSSI_2_5_m { get; set; }
-      public int RSSI_3_0_m { get; set; }
+      public int Rssi_One_Metre { get; set; }
 
-      public bool IsCalibrated => RSSI_0_5_m < 0 && RSSI_1_0_m < 0 && RSSI_1_5_m < 0
-         && RSSI_2_0_m < 0 && RSSI_2_5_m < 0 && RSSI_3_0_m < 0;
+      public bool IsCalibrated => Rssi_One_Metre != default;
    }
 }

@@ -111,7 +111,7 @@ namespace PK.iOS.Bluetooth
                break;
 
             case CBManagerState.Unsupported:
-               StateDelegate?.NotifyBluetoothNotSupported( );
+               StateDelegate?.NotifyBluetoothNotSupported( "Oh no...", "Your device does not support Bluetooth. This application can no longer be used on your device." );
                break;
 
             case CBManagerState.PoweredOn:

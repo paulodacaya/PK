@@ -1,5 +1,4 @@
 ﻿using System;
-using CoreGraphics;
 using PK.iOS.Helpers;
 using PK.ViewModels;
 using UIKit;
@@ -13,6 +12,7 @@ namespace PK.iOS.Controllers
       private UIButton actionButton;
 
       // UI Elements
+      private SimpleLoadingController loadingController;
 
       public CalibrateOnBoardingController( )
       {
@@ -28,6 +28,11 @@ namespace PK.iOS.Controllers
          SetupView( );
          SetupContent( );
          SetupActionButton( );
+      }
+
+      public override void ViewDidAppear( bool animated )
+      {
+         base.ViewDidAppear( animated );
       }
 
       private void SetupView( )
@@ -80,9 +85,48 @@ namespace PK.iOS.Controllers
 
       private void HandleActionButtonTouchUpInside( object sender, EventArgs e ) => viewModel.ActionSelected( );
 
+      void IOnBoardingViewModel.PresentLoading( )
+      {
+         InvokeOnMainThread( ( ) => {
+            PresentViewController( new SimpleLoadingController( ), animated: true, completionHandler: null );
+         } );
+      }
+
+      void IOnBoardingViewModel.DismissLoading( )
+      {
+         InvokeOnMainThread( ( ) => {
+            if( PresentedViewController is SimpleLoadingController loadingController )
+               loadingController.DismissViewController( animated: true , completionHandler: null );
+         } );
+      }
+
+      void IOnBoardingViewModel.PresentCalibrationDataFound( string title, string message )
+      {
+         InvokeOnMainThread( ( ) => {
+            var actionDialogController = new ActionDialogController( title, message );
+
+            actionDialogController.AddAction( "Do it myself", ( ) => {
+               viewModel.ActionPerformCaliberationMySelf( );
+            } );
+
+            actionDialogController.AddAction( "Use existing data", ( ) => {
+               viewModel.ActionUseExistingCalibrationData( );
+            } );
+
+            PresentViewController( actionDialogController, animated: true, completionHandler: null );
+         } );
+      }
+
       void IOnBoardingViewModel.PresentCameraCalibration( )
       {
-         PresentViewController( new CameraCalibrationController( ), animated: true, completionHandler: null );
+         InvokeOnMainThread( ( ) => {
+            PresentViewController( new CameraCalibrationController( ), animated: true, completionHandler: null );
+         } );
+      }
+
+      void IOnBoardingViewModel.NavigateToHome( )
+      {
+         NavigationController.PushViewController( new HomeController( ), animated: true );
       }
    }
 }

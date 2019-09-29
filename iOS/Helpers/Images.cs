@@ -51,5 +51,7 @@ namespace PK.iOS.Helpers
       public static UIImage PK1 => UIImage.FromBundle( "PK1" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
       public static UIImage PK2 => UIImage.FromBundle( "PK2" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
       public static UIImage PK3 => UIImage.FromBundle( "PK3" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
+      public static UIImage PK4 => UIImage.FromBundle( "PK4" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
+      public static UIImage PK5 => UIImage.FromBundle( "PK5" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
    }
 }

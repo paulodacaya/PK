@@ -21,8 +21,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\Zone.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\Calibration\CalibrationOnBoardingViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ConfigureZonesViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Cloud\CloudManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\CalibrationHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Helpers\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Cloud\" />
   </ItemGroup>
 </Project>

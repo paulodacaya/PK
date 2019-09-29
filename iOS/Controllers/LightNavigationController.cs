@@ -18,11 +18,11 @@ namespace PK.iOS.Controllers
 
       public override UIStatusBarStyle PreferredStatusBarStyle( ) => TopViewController?.PreferredStatusBarStyle( ) ?? UIStatusBarStyle.LightContent;
 
-      void IBluetoothLEState.NotifyBluetoothNotSupported( )
+      void IBluetoothLEState.NotifyBluetoothNotSupported( string title, string message )
       {
-         var alertController = UIAlertController.Create( Strings.UhOh, Strings.NoBluetoothSuportText, UIAlertControllerStyle.Alert );
+         var actionDialogController = new ActionDialogController( title, message );
 
-         TopViewController.PresentViewController( alertController, animated: true, completionHandler: null );
+         TopViewController.PresentViewController( actionDialogController, animated: true, completionHandler: null );
       }
 
       void IBluetoothLEState.NotifyBluetoothIsOff( )

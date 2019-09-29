@@ -26,29 +26,5 @@ namespace PK.Models
       }
 
       public static string Path => Configuration.DatabasePath;
-
-      public static bool DeviceIsCalibrated( )
-      {
-         var realm = Realm.GetInstance( Configuration );
-
-         var calibration = realm.Find<Calibration>( DeviceInfo.Model );
-
-         if( calibration == null )
-         {
-            Console.WriteLine( "PK - Creating new Calibration table." );
-
-            realm.Write( ( ) => {
-               var newCalibration = new Calibration {
-                  DeviceModel = DeviceInfo.Model
-               };
-
-               realm.Add( newCalibration );
-            } );
-
-            return false;
-         }
-
-         return calibration.IsCalibrated;
-      }
    }
 }

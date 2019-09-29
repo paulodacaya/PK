@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Foundation;
+using PK.Cloud;
 using PK.Models;
 using Realms;
 using Xamarin.Essentials;
@@ -11,14 +15,16 @@ namespace PK.ViewModels
    {
       void UpdateCalibrationProgress( float percent );
       void StopAdvertisingAndReset( );
-      void ShowCalibrationCompleted( );
+      void ShowCalibrationCompleted( string calibrationData );
+      void PresentLoading( );
+      void DismissLoading( );
       void NavigateToHome( );
    }
 
    public class CameraCalibrationViewModel
    {
-      // Only calibrate (RSSI to distance mapping) when distance is 0.5 metres
-      public readonly double RSSICapturableDistance = 0.5;
+      // Only calibrate (RSSI to distance mapping) when distance is 1 metre
+      public readonly double RSSICapturableDistance = 1;
 
       private readonly ICameraCalibrationViewModel viewModel;
 
@@ -29,15 +35,13 @@ namespace PK.ViewModels
 
       public readonly string Message;
 
-      public Calibration CalibrationData => Realm.GetInstance( PKRealm.Configuration ).Find<Calibration>( DeviceInfo.Model );
-
       public CameraCalibrationViewModel( ICameraCalibrationViewModel viewModel )
       {
          this.viewModel = viewModel;
 
          RssiList = new List<int>( );
 
-         Message = "The following information has been obtained from the calibration. You can perform the calibration again in Settings.";
+         Message = "The following information has been obtained from the calibration. You can perform the calibration again in your home screen.";
       }
 
       public void calibrateRSSI( int RSSI )
@@ -67,13 +71,9 @@ namespace PK.ViewModels
             viewModel.StopAdvertisingAndReset( );
 
             // Check for any outliers and remove them.
-            var maxRssiAt0_5_m = CheckForOutliers( RssiList.Min( ) );
+            var max_Rssi_One_Metre = CheckForOutliers( RssiList.Min( ) );
 
-            Console.WriteLine( $"PK - Maximum RSSI at 0.5 metres is {maxRssiAt0_5_m}" );
-
-            var kConstant = CalculateKConstant( maxRssiAt0_5_m, RSSICapturableDistance );
-
-            Console.WriteLine( $"PK - Calculated KConstant is {kConstant}" );
+            Console.WriteLine( $"PK - Maximum RSSI at 1 metre is {max_Rssi_One_Metre}" );
 
             Console.WriteLine( "PK - Storing calibration data to realm commenced" );
 
@@ -82,38 +82,8 @@ namespace PK.ViewModels
                var realm = Realm.GetInstance( PKRealm.Configuration );
                var calibration = realm.Find<Calibration>( DeviceInfo.Model );
 
-               if( calibration == null )
-                  throw new KeyNotFoundException( message: "Calibration object could not be found in realm. Object is NULL." );
-
-               Console.WriteLine( "PK - Storing calibration data to realm commenced" );
-
-               var rssi_1_0_m = CalculateRssiForDistance( 1.0, kConstant );
-
-               Console.WriteLine( $"PK - Calculated RSSI at 1.0m: {rssi_1_0_m}" );
-
-               var rssi_1_5_m = CalculateRssiForDistance( 1.5, kConstant );
-
-               Console.WriteLine( $"PK - Calculated RSSI at 1.5m: {rssi_1_5_m}" );
-
-               var rssi_2_0_m = CalculateRssiForDistance( 2.0, kConstant );
-
-               Console.WriteLine( $"PK - Calculated RSSI at 2.0m: {rssi_2_0_m}" );
-
-               var rssi_2_5_m = CalculateRssiForDistance( 2.5, kConstant );
-
-               Console.WriteLine( $"PK - Calculated RSSI at 2.5m: {rssi_2_5_m}" );
-
-               var rssi_3_0_m = CalculateRssiForDistance( 3.0, kConstant );
-
-               Console.WriteLine( $"PK - Calculated RSSI at 3.0m: {rssi_3_0_m}" );
-
                realm.Write( ( ) => {
-                  calibration.RSSI_0_5_m = maxRssiAt0_5_m;
-                  calibration.RSSI_1_0_m = rssi_1_0_m;
-                  calibration.RSSI_1_5_m = rssi_1_5_m;
-                  calibration.RSSI_2_0_m = rssi_2_0_m;
-                  calibration.RSSI_2_5_m = rssi_2_5_m;
-                  calibration.RSSI_3_0_m = rssi_3_0_m;
+                  calibration.Rssi_One_Metre = max_Rssi_One_Metre;
                } );
             }
             catch( Exception ex )
@@ -125,7 +95,7 @@ namespace PK.ViewModels
 
             Console.WriteLine( "PK - Storing calibration data successfully completed" );
 
-            viewModel.ShowCalibrationCompleted( );
+            viewModel.ShowCalibrationCompleted( max_Rssi_One_Metre.ToString( ) );
          }
       }
 
@@ -140,6 +110,40 @@ namespace PK.ViewModels
 
          return rssi;
       }
+
+      public void ActionFinished( )
+      {
+         viewModel.PresentLoading( );
+
+         Task.Delay( 1000 ).ContinueWith( task => {
+
+            // Attempt to store data in the cloud
+            var realm = Realm.GetInstance( PKRealm.Configuration );
+            var calibration = realm.Find<Calibration>( DeviceInfo.Model );
+
+            CloudManager.SetCalibrationData( calibration, ( NSError error ) => {
+
+               viewModel.DismissLoading( );
+
+               Task.Delay( 1000 ).ContinueWith( anotherTask => {
+
+                  if( error != null )
+                  {
+                     Console.WriteLine( "PK - Error saving calibration data to cloud. Did not save." );
+                  }
+
+                  viewModel.NavigateToHome( );
+
+               } );
+            } );
+         } );
+
+         
+      }
+
+      /*
+       
+      CURRENTLY NOT IN USE
 
       public double CalculateKConstant( double rssi, double distance )
       {
@@ -159,10 +163,6 @@ namespace PK.ViewModels
          return ( int )Math.Ceiling( kConstant / Math.Pow( distance, 2.0 ) );
       }
 
-      /*
-
-         CURRENTLY NOT IN USE
-
       public void ActionUseStandardZones( )
       {
          // Store 'default' zones.
@@ -178,15 +178,7 @@ namespace PK.ViewModels
 
          viewModel.NavigateToHome( );
       }
+
       */
-
-      public void ActionFinished( )
-      {
-         // TODO Connect to FireStore Database and store calibration informartion for this Device Model.
-
-         // Loading dialog screen during this process.
-
-         viewModel.NavigateToHome( );
-      }
    }
 }

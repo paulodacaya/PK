@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ARKit;
@@ -23,6 +24,7 @@ namespace PK.iOS.Controllers
       private const string ARResourceImageGroup = "AR Resources";
 
       private bool isRestartAvailable = true; // Prevents restarting the session while a restart is in progress.
+      private readonly bool isRecalibrating;
       private bool canCaptureRSSI;
 
       private readonly CameraCalibrationViewModel viewModel;
@@ -30,9 +32,11 @@ namespace PK.iOS.Controllers
       private ARSCNView sceneView;
       private CameraCalibrationStatusController cameraCalibrationStatusController;
 
-      public CameraCalibrationController( )
+      public CameraCalibrationController( bool isRecalibrating = false )
       {
          viewModel = new CameraCalibrationViewModel( this );
+
+         this.isRecalibrating = isRecalibrating;
 
          // Start scanning for BLE advertisements
          IOSBluetoothLE.Instance.AdvertisementDelegate = this;
@@ -282,17 +286,34 @@ namespace PK.iOS.Controllers
          }
       }
 
-      void ICameraCalibrationViewModel.ShowCalibrationCompleted( )
+      void ICameraCalibrationViewModel.ShowCalibrationCompleted( string calibrationData )
       {
-         cameraCalibrationStatusController.NotifyCalibrationCompleted( );
+         cameraCalibrationStatusController.NotifyCalibrationCompleted( calibrationData );
+      }
+
+      void ICameraCalibrationViewModel.PresentLoading( )
+      {
+         PresentViewController( new SimpleLoadingController( ), animated: true, completionHandler: null );
+      }
+
+      void ICameraCalibrationViewModel.DismissLoading( )
+      {
+         InvokeOnMainThread( ( ) => {
+            if( PresentedViewController is SimpleLoadingController loadingController )
+               loadingController.DismissViewController( animated: true, completionHandler: null );
+         } );
       }
 
       void ICameraCalibrationViewModel.NavigateToHome( )
       {
-         var homeController = new HomeController( );
+         InvokeOnMainThread( ( ) => {
+            if( PresentingViewController is UINavigationController navigationController && !isRecalibrating )
+            {
+               navigationController.PushViewController( new HomeController( ), animated: false );
+            }
 
-         if( PresentingViewController is UINavigationController navigationController )
-            navigationController.PushViewController( homeController, animated: true );
+            DismissViewController( animated: true, completionHandler: null );
+         } );
       }
    }
 
@@ -339,7 +360,7 @@ namespace PK.iOS.Controllers
 
          // Testing purposes only.
          Task.Delay( 2000 ).ContinueWith( task => {
-            NotifyCalibrationCompleted( );
+            NotifyCalibrationCompleted( "NaN" );
          } );
       }
 
@@ -394,7 +415,6 @@ namespace PK.iOS.Controllers
          finishedButton.Hidden = true;
          finishedButton.TouchUpInside += ( sender, eventArgs ) => {
             viewModel.ActionFinished( );
-            DismissViewController( animated: true, completionHandler: null );
          };
 
          calibrationCompletedViews.Add( messagesLabel );
@@ -555,12 +575,12 @@ namespace PK.iOS.Controllers
          } );
       }
 
-      public void NotifyCalibrationCompleted( )
+      public void NotifyCalibrationCompleted( string calibrationData )
       {
          InvokeOnMainThread( ( ) => {
             titleLabel.Text = "Calibration Completed";
             subTitleLabel.Text = "The calibration has been successful.";
-            rssi_1_0_m_Label.Text = viewModel.CalibrationData.RSSI_0_5_m.ToString( );
+            rssi_1_0_m_Label.Text = calibrationData;
             closeButton.Hidden = true;
             ProgressView.Hidden = true;
             frameView.Hidden = true;

@@ -1,6 +1,7 @@
 ﻿using System;
 using Foundation;
 using ObjCRuntime;
+using PK.Helpers;
 using PK.iOS.Controllers;
 using PK.iOS.Helpers;
 using PK.Models;
@@ -24,7 +25,7 @@ namespace PK.iOS
          Window = new UIWindow( );
          Window.MakeKeyAndVisible( );
 
-         if( PKRealm.DeviceIsCalibrated( ) )
+         if( CalibrationHelper.DeviceIsCalibrated( ) )   
          {
             // Navgiate to Home Screen
             Window.RootViewController = new LightNavigationController( rootViewController: new HomeController( ) );
