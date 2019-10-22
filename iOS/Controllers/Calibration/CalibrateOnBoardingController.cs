@@ -11,9 +11,6 @@ namespace PK.iOS.Controllers
       private readonly CalibrateOnBoardingViewModel viewModel;
       private UIButton actionButton;
 
-      // UI Elements
-      private SimpleLoadingController loadingController;
-
       public CalibrateOnBoardingController( )
       {
          viewModel = new CalibrateOnBoardingViewModel( this );
@@ -80,7 +77,7 @@ namespace PK.iOS.Controllers
          View.AddSubview( actionButton );
 
          actionButton.Anchor( leading: View.LayoutMarginsGuide.LeadingAnchor, bottom: View.LayoutMarginsGuide.BottomAnchor,
-            trailing: View.LayoutMarginsGuide.TrailingAnchor );
+            trailing: View.LayoutMarginsGuide.TrailingAnchor, padding: new UIEdgeInsets( 0, 0, 8, 0 ) );
       }
 
       private void HandleActionButtonTouchUpInside( object sender, EventArgs e ) => viewModel.ActionSelected( );

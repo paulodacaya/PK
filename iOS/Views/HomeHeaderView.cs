@@ -10,19 +10,26 @@ namespace PK.iOS.Views
       public UILabel VehicleInfoLabel { get; }
       public UILabel VehicleStateLabel { get; }
       public UIImageView VehicleStateImageView { get; }
+      public UILabel RssiLabel { get; }
 
 
       public HomeHeaderView( )
       {
+         BackgroundColor = UIColor.FromRGB( 239, 239, 239 );
          PreservesSuperviewLayoutMargins = true;
 
-         GreetingLabel = Components.UILabel( string.Empty, Colors.BoschBlue, Fonts.BoschBold.WithSize( 26 ) );
+         GreetingLabel = Components.UILabel( string.Empty, Colors.BoschBlue, Fonts.BoschBold.WithSize( 26 ), lines: 1 );
          VehicleInfoLabel = Components.UILabel( string.Empty, Colors.BoschBlue, Fonts.BoschLight.WithSize( 15 ) );
          VehicleStateLabel = Components.UILabel( string.Empty, Colors.BoschBlue, Fonts.BoschLight.WithSize( 15 ), lines: 1 );
          VehicleStateImageView = Components.UIImageView( null, Colors.BoschBlue );
+         RssiLabel = Components.UILabel( string.Empty, Colors.BoschBlue, Fonts.BoschLight.WithSize( 15 ), lines: 1 );
 
          var stackView = VStack(
-            GreetingLabel,
+            HStack(
+               GreetingLabel,
+               new UIView( ),
+               RssiLabel
+            ),
             VehicleInfoLabel,
             HStack(
                VehicleStateLabel,

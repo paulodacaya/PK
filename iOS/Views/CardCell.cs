@@ -69,6 +69,9 @@ namespace PK.iOS.Views
             case CardItemViewModel.c_id_vehicleZoneVisual:
                iconImageView.Image = Images.CircleSlice;
                break;
+            case CardItemViewModel.c_id_deleteData:
+               iconImageView.Image = Images.DatabaseRemove;
+               break;
          }
       }
 

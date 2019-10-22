@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Foundation;
 using PK.Cloud;
@@ -29,9 +28,10 @@ namespace PK.ViewModels
       private readonly ICameraCalibrationViewModel viewModel;
 
       private bool calibrationCompleted;
-      private readonly float completionCount = 100f;
+      private readonly float completionCount = 200f;
       private float rssiCount;
       private readonly List<int> RssiList;
+      private readonly HashSet<int> RssiHashSet; 
 
       public readonly string Message;
 
@@ -40,25 +40,27 @@ namespace PK.ViewModels
          this.viewModel = viewModel;
 
          RssiList = new List<int>( );
+         RssiHashSet = new HashSet<int>( );
 
          Message = "The following information has been obtained from the calibration. You can perform the calibration again in your home screen.";
       }
 
-      public void calibrateRSSI( int RSSI )
+      public void calibrateRssi( int RSSI )
       {
          // Prevent this method from being called after calibration is completed.
          if( calibrationCompleted )
             return;
 
          RssiList.Add( RSSI );
+         RssiHashSet.Add( RSSI );
 
          rssiCount++;
 
-         var progressPercent = rssiCount / completionCount;
+         var progress = rssiCount / completionCount;
 
-         Console.WriteLine( $"PK - RSSI receieved: {RSSI}. Progress: {progressPercent * 100}%" );
+         Console.WriteLine( $"PK - RSSI receieved: {RSSI}. Progress: {progress * 100}%" );
 
-         viewModel.UpdateCalibrationProgress( progressPercent );
+         viewModel.UpdateCalibrationProgress( progress );
 
          //  Calibration is completed
          if( Math.Abs( rssiCount - completionCount ) < double.Epsilon )
@@ -67,11 +69,16 @@ namespace PK.ViewModels
 
             Console.WriteLine( $"PK - Calibration completed" );
 
+            Console.WriteLine( $"PK - Printing out Calibration data" );
+
+            foreach( var rssi in RssiHashSet )
+               Console.WriteLine( $"   PK - RSSI {rssi}, count: {RssiList.Count( r => r == rssi )}" );   
+
             // iOS and Android should STOP advertising and do any clean up.
             viewModel.StopAdvertisingAndReset( );
 
             // Check for any outliers and remove them.
-            var max_Rssi_One_Metre = CheckForOutliers( RssiList.Min( ) );
+            var max_Rssi_One_Metre = CheckAndRemoveOutliers( RssiList.Min( ) );
 
             Console.WriteLine( $"PK - Maximum RSSI at 1 metre is {max_Rssi_One_Metre}" );
 
@@ -99,13 +106,12 @@ namespace PK.ViewModels
          }
       }
 
-      private int CheckForOutliers( int rssi )
+      private int CheckAndRemoveOutliers( int rssi )
       {
-         if( RssiList.Count( r => r == rssi ) <= 2 )
+         if( RssiList.Count( r => r == rssi ) <= 10 )
          {
             Console.WriteLine( $"PK - Outlier RSSI: {rssi}." );
-
-            return CheckForOutliers( ++rssi );
+            return CheckAndRemoveOutliers( ++rssi );
          }
 
          return rssi;
@@ -137,8 +143,6 @@ namespace PK.ViewModels
                } );
             } );
          } );
-
-         
       }
 
       /*

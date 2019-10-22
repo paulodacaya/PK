@@ -33,7 +33,7 @@ namespace PK.iOS
          else
          {
             // Navigate to Calibration OnBoarding
-            Window.RootViewController = new LightNavigationController( rootViewController: new HomeController( ) );
+            Window.RootViewController = new LightNavigationController( rootViewController: new CalibrateOnBoardingController( ) );
          }
 
          ApplyGlobalStyling( );

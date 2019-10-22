@@ -4,6 +4,6 @@ namespace PK.Interfaces
 {
    public interface IBluetoothLEAdvertisement
    {
-      void ReceivedPKAdvertisement( Anchor anchor, int RSSI );
+      void ReceivedPKAdvertisement( Anchor anchor, int rssi );
    }
 }

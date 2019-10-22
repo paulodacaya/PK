@@ -10,7 +10,6 @@ namespace PK.Helpers
       public static bool DeviceIsCalibrated( )
       {
          var realm = Realm.GetInstance( PKRealm.Configuration );
-
          var calibration = realm.Find<Calibration>( DeviceInfo.Model );
 
          if( calibration == null )
@@ -24,6 +23,8 @@ namespace PK.Helpers
 
                realm.Add( newCalibration );
             } );
+
+            return false;
          }
 
          return calibration.IsCalibrated;

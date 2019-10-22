@@ -3,7 +3,6 @@ using System.Text;
 using CoreBluetooth;
 using Foundation;
 using PK.Interfaces;
-using PK.Models;
 using PK.Helpers;
 
 namespace PK.iOS.Bluetooth
@@ -94,7 +93,6 @@ namespace PK.iOS.Bluetooth
 #if DEBUG
             //LogAdvertisementData( advertisementData, RSSI );
 #endif
-
             AdvertisementDelegate?.ReceivedPKAdvertisement( AnchorHelper.GetAnchorType( localNameString ), RSSI.Int32Value );
          }
       }
@@ -161,6 +159,8 @@ namespace PK.iOS.Bluetooth
          stringBuilder.Append( $"----------------------------------------------------------------" ).AppendLine( );
 
          Console.WriteLine( stringBuilder );
+
+         // EXTRA DETAILS IF NEEDED
 
          //var manufacturerData = advertisementData[ CBAdvertisement.DataManufacturerDataKey ] as NSData;
          //stringBuilder.Append( $"Manufacturer Data: {manufacturerData?.Description}" ).AppendLine( ).AppendLine( );

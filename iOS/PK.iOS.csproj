@@ -347,6 +347,10 @@
     <ImageAsset Include="Assets.xcassets\PK5.imageset\pk_5_256.png" />
     <ImageAsset Include="Assets.xcassets\PK5.imageset\pk_5_512.png" />
     <ImageAsset Include="Assets.xcassets\PK5.imageset\pk_5_1024.png" />
+    <ImageAsset Include="Assets.xcassets\DatabaseRemove.imageset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\DatabaseRemove.imageset\DatabaseRemove128.png" />
+    <ImageAsset Include="Assets.xcassets\DatabaseRemove.imageset\DatabaseRemove256.png" />
+    <ImageAsset Include="Assets.xcassets\DatabaseRemove.imageset\DatabaseRemove64.png" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\Fonts\BrixSansMedium.otf">
@@ -389,6 +393,7 @@
     <Folder Include="Assets.xcassets\BoschSuperGraphicBackground.imageset\" />
     <Folder Include="Assets.xcassets\PK4.imageset\" />
     <Folder Include="Assets.xcassets\PK5.imageset\" />
+    <Folder Include="Assets.xcassets\DatabaseRemove.imageset\" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="LaunchScreen.storyboard" />

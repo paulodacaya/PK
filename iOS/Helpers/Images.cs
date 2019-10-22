@@ -13,6 +13,7 @@ namespace PK.iOS.Helpers
       public static UIImage ArrowUp => UIImage.FromBundle( "ArrowUp" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
       public static UIImage ArrowDown => UIImage.FromBundle( "ArrowDown" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
       public static UIImage ArrowSlimUp => UIImage.FromBundle( "ArrowSlimUp" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
+      public static UIImage DatabaseRemove => UIImage.FromBundle( "DatabaseRemove" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
       public static UIImage InformationOutline => UIImage.FromBundle( "InformationOutline" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
       public static UIImage KeyVarient => UIImage.FromBundle( "KeyVarient" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );
       public static UIImage Navigation => UIImage.FromBundle( "Navigation" ).ImageWithRenderingMode( UIImageRenderingMode.AlwaysTemplate );

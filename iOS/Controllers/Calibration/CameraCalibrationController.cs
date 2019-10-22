@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ARKit;
@@ -23,9 +22,9 @@ namespace PK.iOS.Controllers
    {
       private const string ARResourceImageGroup = "AR Resources";
 
-      private bool isRestartAvailable = true; // Prevents restarting the session while a restart is in progress.
+      private bool isRestartAvailable = true; // Prevents restarting the session while a restart is already in progress.
       private readonly bool isRecalibrating;
-      private bool canCaptureRSSI;
+      private bool canCaptureRssi;
 
       private readonly CameraCalibrationViewModel viewModel;
 
@@ -56,11 +55,11 @@ namespace PK.iOS.Controllers
       {
          base.ViewDidAppear( animated );
 
-         //// Prevent the screen from dimming to avoid interupting the AR experience.
-         //UIApplication.SharedApplication.IdleTimerDisabled = true;
+         // Prevent the screen from dimming to avoid interupting the AR experience.
+         UIApplication.SharedApplication.IdleTimerDisabled = true;
 
-         //// Start AR caibration experience.
-         //ResetTracking( );
+         // Start AR caibration experience.
+         ResetTracking( );
       }
 
       public override void ViewDidDisappear( bool animated )
@@ -186,11 +185,11 @@ namespace PK.iOS.Controllers
 
             var cameraToImageDistanceRounded = Math.Round( cameraToImageDistance.Length, 2 );
 
-            // Allow to capture RSSI from BLE advertisements if distance is 0.5m. EPSILON is used to compare double values.
-            canCaptureRSSI = Math.Abs( cameraToImageDistanceRounded - viewModel.RSSICapturableDistance ) < double.Epsilon;
+            // Allow to capture RSSI from BLE advertisements if its at a 'capturable' distance.
+            canCaptureRssi = Math.Abs( cameraToImageDistanceRounded - viewModel.RSSICapturableDistance ) < double.Epsilon;
 
             cameraCalibrationStatusController.UpdateDistanceMessage( $"{cameraToImageDistanceRounded}m" );
-            cameraCalibrationStatusController.NotifyUiState( canCaptureRSSI );
+            cameraCalibrationStatusController.NotifyUiState( canCaptureRssi );
          }
       }
       #endregion
@@ -203,11 +202,11 @@ namespace PK.iOS.Controllers
 
          if( !imageAnchor.IsTracked )
          {
-            if( canCaptureRSSI )
+            if( canCaptureRssi )
             {
-               canCaptureRSSI = false;
+               canCaptureRssi = false;
                cameraCalibrationStatusController.UpdateDistanceMessage( $"Find the Tracker" );
-               cameraCalibrationStatusController.NotifyUiState( canCaptureRSSI );
+               cameraCalibrationStatusController.NotifyUiState( canCaptureRssi );
             }
          }  
       }
@@ -260,11 +259,11 @@ namespace PK.iOS.Controllers
          PresentViewController( errorAlertController, animated: true, completionHandler: null );
       }
 
-      void IBluetoothLEAdvertisement.ReceivedPKAdvertisement( Anchor anchor, int RSSI )
+      void IBluetoothLEAdvertisement.ReceivedPKAdvertisement( Anchor anchor, int rssi )
       {
-         if( canCaptureRSSI )
+         if( canCaptureRssi )
          {
-            viewModel.calibrateRSSI( RSSI );
+            viewModel.calibrateRssi( rssi );
          }
       }
 
@@ -275,7 +274,7 @@ namespace PK.iOS.Controllers
 
       void ICameraCalibrationViewModel.StopAdvertisingAndReset( )
       {
-         canCaptureRSSI = false;
+         canCaptureRssi = false;
          IOSBluetoothLE.Instance.StopScanningForAdvertisements( );
 
          using( var configuration = new ARImageTrackingConfiguration( ) )
@@ -358,10 +357,10 @@ namespace PK.iOS.Controllers
       {
          base.ViewDidAppear( animated );
 
-         // Testing purposes only.
-         Task.Delay( 2000 ).ContinueWith( task => {
-            NotifyCalibrationCompleted( "NaN" );
-         } );
+        //// Testing purposes only.
+        //Task.Delay( 2000 ).ContinueWith( task => {
+        //   NotifyCalibrationCompleted( "NaN" );
+        //} );
       }
 
       private void SetupTopCalibrationView( )

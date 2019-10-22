@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Timers;
 using PK.Helpers;
 using PK.Interfaces;
 using PK.iOS.Bluetooth;
@@ -12,13 +13,40 @@ namespace PK.ViewModels
    public interface IHomeViewModel
    {
       void ReloadRowAt( int row );
-      void ShowPrompt( string title, string message, string cancelText, string actionText );
+      void ShowRecalibratePrompt( string title, string message, string cancelText, string actionText );
+      void ShowDeleteDataPrompt( string title, string message, string cancelText, string actionText );
       void PresentCameraRecalibration( );
       void NotifyDeviceInZoneStateChanged( bool isInZone );
+      void UpdateRssi( int rssi );
+      void NavigateToOnBoarding( );
    }
 
    public class HomeViewModel : IBluetoothLEAdvertisement
    {
+      private static Timer timer;
+      private static bool isTimerRunning;
+
+      static HomeViewModel( )
+      {
+         timer = new Timer( interval: 2000 );
+         timer.AutoReset = false;
+         timer.Elapsed += ( sender, elapsedEventArgs ) => stopTimer( );
+      }
+
+      static void startTimer( )
+      {
+         isTimerRunning = true;
+         timer.Start( );
+         Console.WriteLine( "PK - Timer stared" );
+      }
+
+      static void stopTimer( )
+      {
+         isTimerRunning = false;
+         timer.Stop( );
+         Console.WriteLine( "PK - Timer stopped" );
+      }
+
       public readonly string VehicleMessage;
 
       public string GreetingMessage
@@ -49,7 +77,7 @@ namespace PK.ViewModels
          this.viewModel = viewModel;
 
          IOSBluetoothLE.Instance.AdvertisementDelegate = this;
-         // IOSBluetoothLE.Instance.ScanForAdvertisements( );
+         IOSBluetoothLE.Instance.ScanForAdvertisements( );
 
          rssi_one_meter = Realm.GetInstance( PKRealm.Configuration )
             .Find<Calibration>( DeviceInfo.Model ).Rssi_One_Metre;
@@ -74,29 +102,49 @@ namespace PK.ViewModels
          };
          vehicleZoneVisualCard.Selected += HandleVehicleZoneVisualCardSelected;
          CardItemViewModels.Add( vehicleZoneVisualCard );
+
+         var deleteDataCard = new CardItemViewModel {
+            Id = CardItemViewModel.c_id_deleteData,
+            Title = "Delete calibration data",
+            Message = "Delete all calibration data in this device."
+         };
+         deleteDataCard.Selected += HandleDeleteDataCardSelected;
+         CardItemViewModels.Add( deleteDataCard );
       }
 
       void IBluetoothLEAdvertisement.ReceivedPKAdvertisement( Anchor anchor, int RSSI )
       {
+         viewModel.UpdateRssi( RSSI );
+
          var localVariableIsInZone = RSSI >= rssi_one_meter;
 
          // Prevent from notifying UI unless the state has changed
 
-         if( localVariableIsInZone != isInZone )
+         if( localVariableIsInZone != isInZone && !isTimerRunning )
          {
             isInZone = localVariableIsInZone;
-
             Console.WriteLine( $"PK - Device in zone state change to: {isInZone}" );
-
             viewModel.NotifyDeviceInZoneStateChanged( isInZone );
+            startTimer( );
          }
       }
 
       public void ActionRecalibrateSelected( ) => viewModel.PresentCameraRecalibration( );
 
+      public void ActionDeleteDatabase( )
+      {
+         var realm = Realm.GetInstance( PKRealm.Configuration );
+
+         realm.Write( ( ) => {
+            realm.RemoveAll<Calibration>( );
+         } );
+
+         viewModel.NavigateToOnBoarding( );
+      }
+
       private void HandleCalibrationCardSelected( object sender, EventArgs eventArgs )
       {
-         viewModel.ShowPrompt(
+         viewModel.ShowRecalibratePrompt(
             title: "Device Already Calibrated",
             message: "You don't need to calibrate your device again, are you sure you want to calibrate your device?",
             cancelText: "Cancel",
@@ -112,6 +160,16 @@ namespace PK.ViewModels
             viewModel.ReloadRowAt( CardItemViewModels.IndexOf( cardItemViewModel ) );
          }
       }
+
+      private void HandleDeleteDataCardSelected( object sender, EventArgs e )
+      {
+         viewModel.ShowDeleteDataPrompt(
+            title: "Are you sure?",
+            message: "Deleting calibration will reset the application.",
+            cancelText: "Cancel",
+            actionText: "Delete data"
+         );
+      }
    }
 
    public class CardItemViewModel
@@ -120,6 +178,7 @@ namespace PK.ViewModels
 
       public const string c_id_calibrate = "id_calibrate";
       public const string c_id_vehicleZoneVisual = "id_vehicleZoneVisual";
+      public const string c_id_deleteData = "id_deleteData";
       public const string c_type_expandable = "type_expandable";
 
       public string Id { get; set; } = string.Empty;
