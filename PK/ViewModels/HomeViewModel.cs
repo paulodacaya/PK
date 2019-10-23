@@ -117,9 +117,7 @@ namespace PK.ViewModels
          viewModel.UpdateRssi( RSSI );
 
          var localVariableIsInZone = RSSI >= rssi_one_meter;
-
          // Prevent from notifying UI unless the state has changed
-
          if( localVariableIsInZone != isInZone && !isTimerRunning )
          {
             isInZone = localVariableIsInZone;

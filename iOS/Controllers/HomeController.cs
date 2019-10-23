@@ -95,11 +95,11 @@ namespace PK.iOS.Controllers
 
       void IHomeViewModel.UpdateRssi( int rssi )
       {
+         var exapandableCell = TableView.VisibleCells.SingleOrDefault( c => c is ExpandableCardCell ) as ExpandableCardCell;
+
          InvokeOnMainThread( ( ) => {
-            if( homeHeaderView != null )
-            {
-               homeHeaderView.RssiLabel.Text = rssi.ToString( );
-            }
+            if( exapandableCell != null )
+                  exapandableCell.RssiLabel.Text = rssi.ToString( );
          } );
       }
 
